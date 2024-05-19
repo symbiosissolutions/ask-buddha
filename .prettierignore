@@ -1,0 +1,7 @@
+build/
+node_modules/
+dist/
+docs/
+.prettierignore
+.gitignore
+*.toml
