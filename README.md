@@ -1,30 +1,73 @@
-# React + TypeScript + Vite
+# Ask Buddha
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This React application simulates a conversation with Lord Buddha, providing users with historical and educational information in an engaging format. The chatbot is powered by OpenAI's API, allowing it to generate informative and contextually appropriate responses. To learn more about interacting with the APIs, check out [this doc](./docs/using-the-openai-assistant-apis.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
 
-## Expanding the ESLint configuration
+- **React**: A JavaScript library for building user interfaces.
+- **Vite**: A modern frontend build tool that significantly improves the development experience.
+- **TypeScript**: A typed superset of JavaScript that compiles to plain JavaScript.
+- **SWC**: A super-fast compiler that powers the transformation of TypeScript into JavaScript.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Setup
 
-- Configure the top-level `parserOptions` property like this:
+To get this project up and running on your local machine, follow these steps:
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+### Prerequisites
+
+- Node.js (>=21.4.0)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+```bash
+git clone git@github.com:symbiosissolutions/ask-buddha.git
+cd ask-buddha
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+2. **Install dependencies**
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Configure the Environment Variables**
+
+Create a `.env` file in the root of the project and add your OpenAI API key:
+
+```plaintext
+VITE_OPENAI_API_KEY=your_openai_api_key_here
+VITE_OPENAI_ASSISTANT_ID=your_assistant_id_here
+```
+
+### Running the Application
+
+To start the application in development mode, run:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+This will start the Vite server, and you can access the app at `http://localhost:5173`.
+
+### Building for Production
+
+To build the app for production, run:
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+## Usage
+
+Once the app is running, you can interact with the chatbot by typing your questions into the chat interface. The bot, assuming the persona of Lord Buddha, will respond with information that is both educational and insightful.
