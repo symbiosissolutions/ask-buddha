@@ -1,4 +1,9 @@
 export enum ROLES {
-  USER = "user",
-  ASSISTANT = "assistant",
+  user = "user",
+  assistant = "assistant",
+}
+
+export enum ROLE_LABELS {
+  user = "You",
+  assistant = "Buddha AI"
 }

@@ -1,10 +1,13 @@
-import { FormEvent, useEffect, useState } from "react";
-import "./App.css";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { openaiClient } from "./openai/threads";
-import { API_KEY, ASSISTANT_ID } from "./constants/config";
-import { ROLES } from "./constants/enums";
 import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
 import { v4 as uuidv4 } from "uuid";
+import { API_KEY, ASSISTANT_ID } from "./constants/config";
+import { ROLES, ROLE_LABELS } from "./constants/enums";
+import appBackground from "./assets/ask-buddha-bg-min.jpg";
+import "./App.css";
+import { INTRODUCTION_TEXT } from "./constants/content";
+import { TypingIndicator } from "./components/TypingIndicator";
 
 type TMessage = {
   id: string;
@@ -21,6 +24,7 @@ function App() {
   const [loadingAssistantResponse, setLoadingAssistantResponse] =
     useState(false);
   const [userInput, setUserInput] = useState("");
+  const chatboxRef = useRef<HTMLDivElement>(null);
 
   const init = async () => {
     setAppInitializing(true);
@@ -31,12 +35,13 @@ function App() {
 
   useEffect(() => {
     init();
-    return () => {
-      setThreadId(undefined);
-      setMessages([]);
-      setUserInput("");
-    };
   }, []);
+
+  useEffect(() => {
+    if (chatboxRef.current) {
+      chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const sendMessageAndGetResponse = async (message: string) => {
     if (threadId !== undefined) {
@@ -86,38 +91,45 @@ function App() {
   };
 
   return (
-    <div>
-      {appInitializing ? (
-        <>
-          <div>Loading...</div>
-        </>
-      ) : (
-        <>
-          <div className="chatbox">
-            {messages.map((message) => (
-              <div key={message.id} className={`message ${message.role}`}>
-                <p>{message.content}</p>
-              </div>
-            ))}
-            {loadingAssistantResponse && (
-              <div className={`message assistant`}>
-                <p>...</p>
-              </div>
-            )}
+    <>
+    {appInitializing ? (
+      <div className="loader"></div>
+    ) : (<></>)}
+      <div className={`screen ${appInitializing ? "loading" : ""}`} style={{backgroundImage: `url(${appBackground})`}}>
+      <div className="chat-section">
+            <div className="chatbox curved" ref={chatboxRef}>
+              {messages.map((message) => (
+                <div key={message.id} className={`message curved ${message.role}`}>
+                  <div className="message-author">
+                    <div className="message-author-avatar"></div>
+                    <h4 className="message-author-role">{ROLE_LABELS[message.role]}</h4>
+                  </div>
+                  <p className="message-content">{message.content}</p>
+                </div>
+              ))}
+              {loadingAssistantResponse && (
+                <div className={`message curved assistant`}>
+                  <TypingIndicator />
+                </div>
+              )}
+            </div>
+            <form id="chat-form" onSubmit={handleSubmit} className="curved">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                disabled={loadingAssistantResponse}
+                placeholder="What would you like to ask Buddha today?"
+              />
+              <button type="submit" disabled={loadingAssistantResponse}></button>
+            </form>
           </div>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              disabled={loadingAssistantResponse}
-              placeholder="What would you like to ask Buddha today?"
-            />
-            <button type="submit" disabled={loadingAssistantResponse}>Send</button>
-          </form>
-        </>
-      )}
+          <div className="about-section curved">
+            <h1>About Me</h1>
+            <div dangerouslySetInnerHTML={{ __html: INTRODUCTION_TEXT }}></div>
+          </div>
     </div>
+    </>
   );
 }
 

@@ -1,42 +1,204 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: "Raleway", sans-serif;
+  color: #171717;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+h1 {
+  font-family: "Poppins";
+  font-weight: 400;
+}
+
+p {
+  font-size: 14px;
+}
+
+.curved {
+  border-radius: 17px;
+}
+
+.screen {
+  height: 100vh;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  padding: 15px;
+}
+
+.screen.loading {
+  filter: blur(8px);
+  justify-content: center;
+  pointer-events: none;
+}
+
+.loader::before {
+  content: "Loading...";
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%)
+}
+
+.about-section {
+  background-color: #FEFDEA;
+  padding: 30px 15px;
+  flex: 1;
+  max-width: 350px;
+}
+
+.chat-section {
+  flex: 2;
+  margin-right: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbox {
+  flex: 1;
+  background-color: #FEFDEA;
+  margin-bottom: 15px;
+  max-width: 350px;
+  align-self: flex-end;
+  width: 100%;
+  padding: 0 15px;
+  max-height: 100%;
+  overflow-y: scroll;
+}
+
+
+/* Styling the scrollbar */
+.chatbox::-webkit-scrollbar {
+  width: 15px; /* Width of the scrollbar */
+}
+
+.chatbox::-webkit-scrollbar-track {
+  background: #FEFDEA; /* Light grey track */
+  border-radius: 10px; /* Match the border-radius of the div */
+  margin: 8px 0; /* Adds top and bottom padding */
+}
+
+.chatbox::-webkit-scrollbar-thumb {
+  background: #CBCBCB; /* Darker grey draggable part */
+  border-radius: 10px; /* Rounded corners for the scrollbar */
+  border: 5px solid transparent; /* Makes a gap between the track and thumb */
+  background-clip: content-box; /* Ensures the background is only within the content box */
+}
+
+.message {
+  padding: 10px 15px;
+  margin: 10px 0;
+}
+
+.message.user {
+  background-color: #FEFCC5;
+}
+
+.message.assistant {
+  background-color: #E2FFDA;
+}
+
+.message .message-author {
+  display: flex;
+  align-items: center;
+}
+
+.message .message-author .message-author-avatar {
+  width: 30px;
+  height: 30px;
+  background-color: #D9D9D9;
+  border-radius: 100%;
+  margin-right: 10px;
+}
+
+.message .message-content {
+  margin-top: 2px;
+}
+
+#chat-form {
+  display: flex;
+  justify-content: flex-end;
+  height: 60px;
+}
+
+#chat-form input {
+  margin-right: 15px;
+  flex: 1;
+  background-color: #FEFDEA;
+  border-radius: 17px;
+  border: none;
+  padding: 0 15px;
+}
+
+#chat-form input:focus {
+  outline: none;
+}
+
+#chat-form button {
+  width: 60px;
+  background-color: #FEFDEA;
+  border-radius: 17px;
+  border: none;
   text-align: center;
+  cursor: pointer;
+  position: relative;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+#chat-form button::after {
+  content: ">";
+  display: block;
+  color: #171717;
+  transform: rotate(-90deg);
+  font-family: 'Raleway';
+  font-size: 28px;
+  position: absolute;
+  top: 15px;
+  left: 19px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.typing-indicator span {
+  background-color: #171717;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  animation: bounce 1.4s infinite;
+  animation-fill-mode: both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
   }
-  to {
-    transform: rotate(360deg);
+  40% {
+    transform: scale(1.0);
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
