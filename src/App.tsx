@@ -97,7 +97,7 @@ function App() {
     ) : (<></>)}
       <div className={`screen ${appInitializing ? "loading" : ""}`} style={{backgroundImage: `url(${appBackground})`}}>
       <div className="chat-section">
-            <div className="chatbox curved" ref={chatboxRef}>
+            <div className="chatbox curved custom-scroll" ref={chatboxRef}>
               {messages.map((message) => (
                 <div key={message.id} className={`message curved ${message.role}`}>
                   <div className="message-author">
@@ -124,7 +124,7 @@ function App() {
               <button type="submit" disabled={loadingAssistantResponse}></button>
             </form>
           </div>
-          <div className="about-section curved">
+          <div className="about-section curved custom-scroll">
             <h1>About Me</h1>
             <div dangerouslySetInnerHTML={{ __html: INTRODUCTION_TEXT }}></div>
           </div>

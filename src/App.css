@@ -55,6 +55,7 @@ p {
   padding: 30px 15px;
   flex: 1;
   max-width: 350px;
+  overflow-y: scroll;
 }
 
 .chat-section {
@@ -78,17 +79,17 @@ p {
 
 
 /* Styling the scrollbar */
-.chatbox::-webkit-scrollbar {
+.custom-scroll::-webkit-scrollbar {
   width: 15px; /* Width of the scrollbar */
 }
 
-.chatbox::-webkit-scrollbar-track {
+.custom-scroll::-webkit-scrollbar-track {
   background: #FEFDEA; /* Light grey track */
   border-radius: 10px; /* Match the border-radius of the div */
   margin: 8px 0; /* Adds top and bottom padding */
 }
 
-.chatbox::-webkit-scrollbar-thumb {
+.custom-scroll::-webkit-scrollbar-thumb {
   background: #CBCBCB; /* Darker grey draggable part */
   border-radius: 10px; /* Rounded corners for the scrollbar */
   border: 5px solid transparent; /* Makes a gap between the track and thumb */
