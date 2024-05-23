@@ -6,7 +6,7 @@ import { API_KEY, ASSISTANT_ID } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
 import appBackground from "./assets/ask-buddha-bg-min.jpg";
 import "./App.css";
-import { INTRODUCTION_TEXT } from "./constants/content";
+import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
 import { TypingIndicator } from "./components/TypingIndicator";
 
 type TMessage = {
@@ -90,19 +90,32 @@ function App() {
     setLoadingAssistantResponse(false);
   };
 
+  const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setMessages([]);
+    await init();
+  };
+
   return (
     <>
-    {appInitializing ? (
-      <div className="loader"></div>
-    ) : (<></>)}
-      <div className={`screen ${appInitializing ? "loading" : ""}`} style={{backgroundImage: `url(${appBackground})`}}>
-      <div className="chat-section">
+      {appInitializing ? <div className="loader"></div> : <></>}
+      <div
+        className={`screen ${appInitializing ? "loading" : ""}`}
+        style={{ backgroundImage: `url(${appBackground})` }}
+      >
+        <div className="screen-main">
+          <div className="chat-section">
             <div className="chatbox curved custom-scroll" ref={chatboxRef}>
               {messages.map((message) => (
-                <div key={message.id} className={`message curved ${message.role}`}>
+                <div
+                  key={message.id}
+                  className={`message curved ${message.role}`}
+                >
                   <div className="message-author">
                     <div className="message-author-avatar"></div>
-                    <h4 className="message-author-role">{ROLE_LABELS[message.role]}</h4>
+                    <h4 className="message-author-role">
+                      {ROLE_LABELS[message.role]}
+                    </h4>
                   </div>
                   <p className="message-content">{message.content}</p>
                 </div>
@@ -121,14 +134,27 @@ function App() {
                 disabled={loadingAssistantResponse}
                 placeholder="What would you like to ask Buddha today?"
               />
-              <button type="submit" disabled={loadingAssistantResponse}></button>
+              <button
+                type="submit"
+                className="submit-chat"
+                disabled={loadingAssistantResponse}
+              ></button>
+              <button
+                type="button"
+                className="clear-chat"
+                onClick={clearChat}
+              ></button>
             </form>
           </div>
           <div className="about-section curved custom-scroll">
             <h1>About Me</h1>
             <div dangerouslySetInnerHTML={{ __html: INTRODUCTION_TEXT }}></div>
           </div>
-    </div>
+        </div>
+        <div className="screen-disclaimer">
+          <p>{DISCLAIMER_TEXT}</p>
+        </div>
+      </div>
     </>
   );
 }

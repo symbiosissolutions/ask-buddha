@@ -5,5 +5,5 @@ export enum ROLES {
 
 export enum ROLE_LABELS {
   user = "You",
-  assistant = "Buddha AI"
+  assistant = "Buddha AI",
 }
