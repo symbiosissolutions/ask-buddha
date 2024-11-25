@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: "Raleway", sans-serif;
+  color: #171717;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+h1 {
+  font-family: "Poppins";
+  font-weight: 400;
+}
+
+p {
+  font-size: 14px;
+}
+
+.curved {
+  border-radius: 17px;
+}
+
+.screen {
+  height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen-main {
+  display: flex;
+  padding: 15px;
+  max-height: 95%;
+  flex: 1;
+}
+
+.screen-disclaimer {
+  height: auto;
+  margin-top: 5px;
+  text-align: center;
+  background-color: #e2ffdaaa;
+  padding: 8px 0;
+}
+
+.screen-disclaimer p {
+  margin: 0;
+  font-weight: bold;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.screen.loading {
+  filter: blur(8px);
+  justify-content: center;
+  pointer-events: none;
+}
+
+.loader::before {
+  content: "Loading...";
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%)
+}
+
+.about-section {
+  background-color: #FEFDEA;
+  padding: 30px 15px;
+  flex: 1;
+  max-width: 350px;
+  overflow-y: scroll;
+}
+
+.chat-section {
+  flex: 2;
+  margin-right: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbox {
+  flex: 1;
+  background-color: #FEFDEA;
+  margin-bottom: 15px;
+  max-width: 350px;
+  align-self: flex-end;
+  width: 100%;
+  padding: 0 15px;
+  max-height: 100%;
+  overflow-y: scroll;
+}
+
+
+/* Styling the scrollbar */
+.custom-scroll::-webkit-scrollbar {
+  width: 15px; /* Width of the scrollbar */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #FEFDEA; /* Light grey track */
+  border-radius: 10px; /* Match the border-radius of the div */
+  margin: 8px 0; /* Adds top and bottom padding */
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #CBCBCB; /* Darker grey draggable part */
+  border-radius: 10px; /* Rounded corners for the scrollbar */
+  border: 5px solid transparent; /* Makes a gap between the track and thumb */
+  background-clip: content-box; /* Ensures the background is only within the content box */
+}
+
+.message {
+  padding: 10px 15px;
+  margin: 10px 0;
+}
+
+.message.user {
+  background-color: #FEFCC5;
+}
+
+.message.assistant {
+  background-color: #E2FFDA;
+}
+
+.message .message-author {
+  display: flex;
+  align-items: center;
+}
+
+.message .message-author .message-author-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  margin-right: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.message.user .message-author .message-author-avatar {
+  background-image: url("./assets/user.png");
+}
+
+.message.assistant .message-author .message-author-avatar {
+  background-image: url("./assets/lotus.png");
+}
+
+.message .message-content {
+  margin-top: 2px;
+}
+
+#chat-form {
+  display: flex;
+  justify-content: flex-end;
+  height: 60px;
+}
+
+#chat-form input {
+  margin-right: 15px;
+  flex: 1;
+  background-color: #FEFDEA;
+  border-radius: 17px;
+  border: none;
+  padding: 0 15px;
+  max-width: 800px;
+}
+
+#chat-form input:focus {
+  outline: none;
+}
+
+#chat-form .submit-chat {
+  margin-right: 15px;
+  padding: 16px;
+}
+
+#chat-form .clear-chat {
+  padding: 10px;
+}
+
+#chat-form .submit-chat, #chat-form .clear-chat {
+  width: 60px;
+  background-color: #FEFDEA;
+  border-radius: 17px;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+#chat-form .submit-chat::after, #chat-form .clear-chat::after {
+  content: "";
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: #171717;
+}
+
+#chat-form .submit-chat::after {
+  background-image: url("./assets/up-arrow.png");
+}
+
+#chat-form .clear-chat::after {
+  background-image: url("./assets/broom.png");
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.typing-indicator span {
+  background-color: #171717;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  animation: bounce 1.4s infinite;
+  animation-fill-mode: both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1.0);
+  }
+}
