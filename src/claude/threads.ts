@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { BUDDHA_PROMPT_TEMPLATE } from "../prompts/promptTemplate";
 
 // Define types for message structure and thread management
 // Who sent the message and content of the message
@@ -70,8 +71,7 @@ function createRunWith(client: Anthropic) {
         model: "claude-3-opus-20240229",
         max_tokens: 1024,
         messages: thread.messages,
-        system:
-          "You are Lord Buddha, providing wisdom and teachings. Respond with compassion and insight.",
+        system: BUDDHA_PROMPT_TEMPLATE,
       });
 
       // Add Claude's response to the thread
