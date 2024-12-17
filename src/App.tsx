@@ -8,11 +8,13 @@ import appBackground from "./assets/ask-buddha-bg-min.jpg";
 import "./App.css";
 import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
 import { TypingIndicator } from "./components/TypingIndicator";
+import Markdown from "react-markdown";
 
 type TMessage = {
   id: string;
   role: `${ROLES}`;
   content: string;
+  format?: "markdown" | "text";
 };
 const assistant = claudeClient(API_KEY);
 
@@ -100,6 +102,7 @@ function App() {
         id: uuidv4(),
         content: assistantResponse as string,
         role: "assistant",
+        format: "markdown",
       },
     ]);
     setLoadingAssistantResponse(false);
@@ -132,7 +135,13 @@ function App() {
                       {ROLE_LABELS[message.role]}
                     </h4>
                   </div>
-                  <p className="message-content">{message.content}</p>
+                  <div className="message-content">
+                    {message.format === "markdown" ? (
+                      <Markdown>{message.content}</Markdown>
+                    ) : (
+                      message.content
+                    )}
+                    </div>
                 </div>
               ))}
               {loadingAssistantResponse && (
