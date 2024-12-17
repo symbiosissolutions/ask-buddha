@@ -1,21 +1,22 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { openaiClient } from "./openai/threads";
-import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
+import { claudeClient } from "./claude/threads";
+// import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
 import { v4 as uuidv4 } from "uuid";
-import { API_KEY, ASSISTANT_ID } from "./constants/config";
+import { API_KEY } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
 import appBackground from "./assets/ask-buddha-bg-min.jpg";
 import "./App.css";
 import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
 import { TypingIndicator } from "./components/TypingIndicator";
+import Markdown from "react-markdown";
 
 type TMessage = {
   id: string;
   role: `${ROLES}`;
   content: string;
+  format?: "markdown" | "text";
 };
-
-const assistant = openaiClient(API_KEY);
+const assistant = claudeClient(API_KEY);
 
 function App() {
   const [threadId, setThreadId] = useState<string | undefined>();
@@ -46,22 +47,38 @@ function App() {
   const sendMessageAndGetResponse = async (message: string) => {
     if (threadId !== undefined) {
       await sendAndProcess();
-      return await getResponse();
+      const response = await getResponse();
+      return response;
+      // return await getResponse();
     }
 
     async function sendAndProcess() {
       if (threadId !== undefined) {
         await assistant.createMessageInThread(threadId, message);
-        await assistant.createRun(threadId, ASSISTANT_ID);
+        await assistant.createRun(threadId);
       }
     }
 
+    //   async function getResponse() {
+    //     if (threadId !== undefined) {
+    //       const allMessagesInThread = await assistant.listMessages(threadId);
+    //       const lastResponse = allMessagesInThread.data[0].content[0] as unknown as TextContentBlock;
+    //       return lastResponse.text.value;
+    //     }
+    //   }
+
     async function getResponse() {
       if (threadId !== undefined) {
-        const allMessagesInThread = assistant.listMessages(threadId);
-        const lastResponse = (await allMessagesInThread).data[0]
-          .content[0] as TextContentBlock;
-        return lastResponse.text.value;
+        const allMessagesInThread = await assistant.listMessages(threadId);
+
+        // Ensure data exists and has the expected structure
+        const lastMessage = allMessagesInThread?.data?.slice(-1)[0];
+        if (!lastMessage || !lastMessage.content?.[0]?.text) {
+          console.error("Error: Response structure is unexpected or missing.");
+          return "I'm sorry, I could not process your message.";
+        }
+
+        return lastMessage.content[0].text;
       }
     }
   };
@@ -85,6 +102,7 @@ function App() {
         id: uuidv4(),
         content: assistantResponse as string,
         role: "assistant",
+        format: "markdown",
       },
     ]);
     setLoadingAssistantResponse(false);
@@ -117,7 +135,13 @@ function App() {
                       {ROLE_LABELS[message.role]}
                     </h4>
                   </div>
-                  <p className="message-content">{message.content}</p>
+                  <div className="message-content">
+                    {message.format === "markdown" ? (
+                      <Markdown>{message.content}</Markdown>
+                    ) : (
+                      message.content
+                    )}
+                    </div>
                 </div>
               ))}
               {loadingAssistantResponse && (

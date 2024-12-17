@@ -11,10 +11,12 @@
     "format": "prettier --write \"./**/*.{tsx,ts,json,md}\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "openai": "4.47.1",
     "prettier": "3.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-markdown": "^9.0.1",
     "uuid": "9.0.1"
   },
   "devDependencies": {
