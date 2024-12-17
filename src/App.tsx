@@ -1,14 +1,19 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { claudeClient } from "./claude/threads";
-// import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
+import Markdown from "react-markdown";
+
+import { openaiClient } from "./openai/threads";
+import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
+
 import { v4 as uuidv4 } from "uuid";
-import { API_KEY } from "./constants/config";
+
+import { API_KEY, ASSISTANT_ID } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
+import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
+
 import appBackground from "./assets/ask-buddha-bg-min.jpg";
 import "./App.css";
-import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
+
 import { TypingIndicator } from "./components/TypingIndicator";
-import Markdown from "react-markdown";
 
 type TMessage = {
   id: string;
@@ -16,7 +21,8 @@ type TMessage = {
   content: string;
   format?: "markdown" | "text";
 };
-const assistant = claudeClient(API_KEY);
+
+const assistant = openaiClient(API_KEY);
 
 function App() {
   const [threadId, setThreadId] = useState<string | undefined>();
@@ -55,32 +61,32 @@ function App() {
     async function sendAndProcess() {
       if (threadId !== undefined) {
         await assistant.createMessageInThread(threadId, message);
-        await assistant.createRun(threadId);
+        await assistant.createRun(threadId, ASSISTANT_ID);
       }
     }
 
-    //   async function getResponse() {
-    //     if (threadId !== undefined) {
-    //       const allMessagesInThread = await assistant.listMessages(threadId);
-    //       const lastResponse = allMessagesInThread.data[0].content[0] as unknown as TextContentBlock;
-    //       return lastResponse.text.value;
-    //     }
-    //   }
-
-    async function getResponse() {
-      if (threadId !== undefined) {
-        const allMessagesInThread = await assistant.listMessages(threadId);
-
-        // Ensure data exists and has the expected structure
-        const lastMessage = allMessagesInThread?.data?.slice(-1)[0];
-        if (!lastMessage || !lastMessage.content?.[0]?.text) {
-          console.error("Error: Response structure is unexpected or missing.");
-          return "I'm sorry, I could not process your message.";
+      async function getResponse() {
+        if (threadId !== undefined) {
+          const allMessagesInThread = await assistant.listMessages(threadId);
+          const lastResponse = allMessagesInThread.data[0].content[0] as unknown as TextContentBlock;
+          return lastResponse.text.value;
         }
-
-        return lastMessage.content[0].text;
       }
-    }
+
+    // async function getResponse() {
+    //   if (threadId !== undefined) {
+    //     const allMessagesInThread = await assistant.listMessages(threadId);
+
+    //     // Ensure data exists and has the expected structure (for Claude)
+    //     const lastMessage = allMessagesInThread?.data?.slice(-1)[0];
+    //     if (!lastMessage || !lastMessage.content?.[0]?.text) {
+    //       console.error("Error: Response structure is unexpected or missing.");
+    //       return "I'm sorry, I could not process your message.";
+    //     }
+
+    //     return lastMessage.content[0].text;
+    //   }
+    // }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
