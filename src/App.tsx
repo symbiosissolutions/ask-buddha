@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { API_KEY, ASSISTANT_ID } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
-import { DISCLAIMER_TEXT, INTRODUCTION_TEXT } from "./constants/content";
+import { DISCLAIMER_TEXT, GREETING_TEXT, INTRODUCTION_TEXT } from "./constants/content";
 
 import appBackground from "./assets/ask-buddha-bg-min.jpg";
 import "./App.css";
@@ -33,9 +33,22 @@ function App() {
   const [userInput, setUserInput] = useState("");
   const chatboxRef = useRef<HTMLDivElement>(null);
 
+  const greeting = GREETING_TEXT;
+
   const init = async () => {
     setAppInitializing(true);
     const thread = await assistant.createThread();
+
+    if (greeting){
+      setMessages([
+        {
+          id: uuidv4(),
+          role: "assistant",
+          content: greeting,
+        }
+      ])
+    }
+    
     setThreadId(thread.id);
     setAppInitializing(false);
   };
