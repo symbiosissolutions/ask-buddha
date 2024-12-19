@@ -92,7 +92,7 @@ p {
   flex: 1;
   background-color: #FEFDEA;
   margin-bottom: 15px;
-  max-width: 350px;
+  max-width: 50%;
   align-self: flex-end;
   width: 100%;
   padding: 0 15px;

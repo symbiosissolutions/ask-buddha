@@ -180,11 +180,13 @@ function App() {
               <button
                 type="submit"
                 className="submit-chat"
+                title="Submit"
                 disabled={loadingAssistantResponse}
               ></button>
               <button
                 type="button"
                 className="clear-chat"
+                title="Clear Chat"
                 onClick={clearChat}
               ></button>
             </form>
