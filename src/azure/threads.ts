@@ -1,4 +1,5 @@
-import AzureOpenAI from "openai";
+import {AzureOpenAI} from "openai";
+
 
 export function azureOpenaiClient(apiKey: string, endpoint: string, apiVersion: string, deployment: string) {
   const openai = new AzureOpenAI({
