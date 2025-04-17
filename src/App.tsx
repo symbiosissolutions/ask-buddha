@@ -1,12 +1,12 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 
-import { openaiClient } from "./openai/threads";
+import { azureOpenaiClient } from "./azure/threads";
 import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { API_KEY, ASSISTANT_ID } from "./constants/config";
+import { API_KEY, ASSISTANT_ID, ENDPOINT, API_VERSION, DEPLOYMENT } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
 import { DISCLAIMER_TEXT, GREETING_TEXT, INTRODUCTION_TEXT } from "./constants/content";
 
@@ -22,7 +22,7 @@ type TMessage = {
   format?: "markdown" | "text";
 };
 
-const assistant = openaiClient(API_KEY);
+const assistant = azureOpenaiClient(API_KEY, ENDPOINT, API_VERSION, DEPLOYMENT);
 
 function App() {
   const [threadId, setThreadId] = useState<string | undefined>();
