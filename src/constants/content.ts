@@ -17,3 +17,9 @@ export const GREETING_VARIATIONS = [
 
 export const GREETING_TEXT =
   GREETING_VARIATIONS[Math.floor(Math.random() * GREETING_VARIATIONS.length)];
+
+export const ABOUT_APP_TEXT = `Ask Buddha is your mindful AI companion, designed to help you
+find clarity, calm, and insight through thoughtful conversation.
+Whether you're seeking daily guidance, engaging activities, or
+just a moment of stillness, Ask Buddha adapts to your needs with
+intelligence and compassion.`;

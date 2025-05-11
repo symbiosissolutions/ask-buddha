@@ -6,14 +6,23 @@ import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { API_KEY, ASSISTANT_ID, ENDPOINT, API_VERSION, DEPLOYMENT } from "./constants/config";
+import {
+  API_KEY,
+  ASSISTANT_ID,
+  ENDPOINT,
+  API_VERSION,
+  DEPLOYMENT,
+} from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
-import { DISCLAIMER_TEXT, GREETING_TEXT, INTRODUCTION_TEXT } from "./constants/content";
+import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
 
-import appBackground from "./assets/ask-buddha-bg-min.jpg";
+import appBackground from "./assets/buddha-bg-img.jpg";
+import videoBackground from "./assets/buddha-bg.mp4";
+
 import "./App.css";
 
 import { TypingIndicator } from "./components/TypingIndicator";
+import Navbar from "./components/Navbar";
 
 type TMessage = {
   id: string;
@@ -21,6 +30,8 @@ type TMessage = {
   content: string;
   format?: "markdown" | "text";
 };
+
+type TextSizeOption = "small" | "medium" | "large";
 
 const assistant = azureOpenaiClient(API_KEY, ENDPOINT, API_VERSION, DEPLOYMENT);
 
@@ -32,6 +43,8 @@ function App() {
     useState(false);
   const [userInput, setUserInput] = useState("");
   const chatboxRef = useRef<HTMLDivElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(true);
+  const [textSize, setTextSize] = useState<TextSizeOption>("medium");
 
   const greeting = GREETING_TEXT;
 
@@ -39,16 +52,16 @@ function App() {
     setAppInitializing(true);
     const thread = await assistant.createThread();
 
-    if (greeting){
+    if (greeting) {
       setMessages([
         {
           id: uuidv4(),
           role: "assistant",
           content: greeting,
-        }
-      ])
+        },
+      ]);
     }
-    
+
     setThreadId(thread.id);
     setAppInitializing(false);
   };
@@ -62,6 +75,15 @@ function App() {
       chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleTextSizeChange = (size: TextSizeOption) => {
+    setTextSize(size);
+    // Apply text size to the document
+    document.documentElement.style.setProperty(
+      "--text-size-factor",
+      size === "small" ? "0.875" : size === "large" ? "1.125" : "1",
+    );
+  };
 
   const sendMessageAndGetResponse = async (message: string) => {
     if (threadId !== undefined) {
@@ -78,13 +100,14 @@ function App() {
       }
     }
 
-      async function getResponse() {
-        if (threadId !== undefined) {
-          const allMessagesInThread = await assistant.listMessages(threadId);
-          const lastResponse = allMessagesInThread.data[0].content[0] as unknown as TextContentBlock;
-          return lastResponse.text.value;
-        }
+    async function getResponse() {
+      if (threadId !== undefined) {
+        const allMessagesInThread = await assistant.listMessages(threadId);
+        const lastResponse = allMessagesInThread.data[0]
+          .content[0] as unknown as TextContentBlock;
+        return lastResponse.text.value;
       }
+    }
 
     // async function getResponse() {
     //   if (threadId !== undefined) {
@@ -132,14 +155,33 @@ function App() {
     setMessages([]);
     await init();
   };
-
+  
   return (
     <>
       {appInitializing ? <div className="loader"></div> : <></>}
+      <Navbar
+        onTextSizeChange={handleTextSizeChange}
+        currentTextSize={textSize}
+      />
       <div
-        className={`screen ${appInitializing ? "loading" : ""}`}
-        style={{ backgroundImage: `url(${appBackground})` }}
+        className={`screen ${appInitializing ? "loading" : ""} pt-16`}
+        style={!videoLoaded ? { backgroundImage: `url(${appBackground})` } : {}}
       >
+        {videoLoaded && (
+          <video
+            className="background-video"
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={appBackground}
+            // style={{ zIndex: 1 }}
+            onError={() => setVideoLoaded(false)}
+          >
+            <source src={videoBackground} type="video/mp4" />
+          </video>
+        )}
+
         <div className="screen-main">
           <div className="chat-section">
             <div className="chatbox curved custom-scroll" ref={chatboxRef}>
@@ -160,7 +202,7 @@ function App() {
                     ) : (
                       message.content
                     )}
-                    </div>
+                  </div>
                 </div>
               ))}
               {loadingAssistantResponse && (
@@ -190,10 +232,6 @@ function App() {
                 onClick={clearChat}
               ></button>
             </form>
-          </div>
-          <div className="about-section curved custom-scroll">
-            <h1>About Me</h1>
-            <div dangerouslySetInnerHTML={{ __html: INTRODUCTION_TEXT }}></div>
           </div>
         </div>
         <div className="screen-disclaimer">
