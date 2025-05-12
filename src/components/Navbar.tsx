@@ -8,6 +8,8 @@ import { FiMenu, FiX } from "react-icons/fi";
 import { FaInfo } from "react-icons/fa";
 import { RxFontSize } from "react-icons/rx";
 
+import logo from "../assets/logo.png";
+
 type TextSizeOption = "small" | "medium" | "large";
 
 interface NavbarProps {
@@ -116,17 +118,24 @@ const Navbar = ({
               </div>
             </div>
 
-            {/* Dark Mode Toggle */}
-            {/* <div className="setting-item">
-              <div className="setting-label">
-                <FiMoon className="setting-icon" />
-                <span>Dark theme</span>
+            <div className="created-by-section">
+              <div className="created-by-content">
+                <p>Created by</p>
+                <a
+                  href="https://symbiosis.solutions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="company-link"
+                >
+                  <img
+                    src={logo}
+                    alt="Symbiosis Solutions"
+                    className="company-logo"
+                  />
+                  <span className="company-name">Symbiosis Solutions</span>
+                </a>
               </div>
-              <label className="toggle-switch">
-                <input type="checkbox" defaultChecked />
-                <span className="toggle-slider"></span>
-              </label>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>

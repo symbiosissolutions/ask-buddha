@@ -164,7 +164,7 @@ function App() {
         currentTextSize={textSize}
       />
       <div
-        className={`screen ${appInitializing ? "loading" : ""} pt-16`}
+        className={`screen ${appInitializing ? "loading" : ""} background-image`}
         style={!videoLoaded ? { backgroundImage: `url(${appBackground})` } : {}}
       >
         {videoLoaded && (

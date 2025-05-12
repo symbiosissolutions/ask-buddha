@@ -15,7 +15,7 @@
 .navbar-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1c1c1c;
+  color: #000000;
 }
 
 .hamburger-btn {
@@ -223,3 +223,47 @@
 .text-size-btn {
   font-size: calc(var(--text-size-factor) * 1rem);
 }
+
+.created-by-section {
+  margin-top: auto;
+  padding: 20px 0;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.created-by-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.created-by-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.company-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+  transition: opacity 0.2s ease;
+}
+
+.company-link:hover {
+  opacity: 0.8;
+}
+
+.company-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.company-name {
+  font-weight: 500;
+}
+
