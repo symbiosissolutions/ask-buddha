@@ -42,7 +42,9 @@ function App() {
   const [loadingAssistantResponse, setLoadingAssistantResponse] =
     useState(false);
   const [userInput, setUserInput] = useState("");
+
   const chatboxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(true);
   const [textSize, setTextSize] = useState<TextSizeOption>("medium");
 
@@ -75,6 +77,12 @@ function App() {
       chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!appInitializing && !loadingAssistantResponse) {
+      inputRef.current?.focus();
+    }
+  }, [appInitializing, loadingAssistantResponse]);
 
   const handleTextSizeChange = (size: TextSizeOption) => {
     setTextSize(size);
@@ -155,7 +163,7 @@ function App() {
     setMessages([]);
     await init();
   };
-  
+
   return (
     <>
       {appInitializing ? <div className="loader"></div> : <></>}
@@ -218,6 +226,7 @@ function App() {
                 onChange={(e) => setUserInput(e.target.value)}
                 disabled={loadingAssistantResponse}
                 placeholder="What would you like to ask Buddha today?"
+                ref={inputRef}
               />
               <button
                 type="submit"
