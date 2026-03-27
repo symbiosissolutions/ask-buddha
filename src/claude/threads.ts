@@ -23,7 +23,7 @@ const threadsStore = new Map<string, Thread>();
  * @param _client - Anthropic client instance (unused but kept for consistent interface)
  */
 
-function createThreadWith(_client: Anthropic) {
+function createThreadWith() {
   return async function () {
     const threadId = Date.now().toString();
     // Initialize new thread with empty message array
@@ -36,7 +36,7 @@ function createThreadWith(_client: Anthropic) {
 }
 
 // Creates a new message in specified thread
-function createMessageInThreadWith(_client: Anthropic) {
+function createMessageInThreadWith() {
   return async function (threadId: string, content: string) {
     const thread = threadsStore.get(threadId);
     if (!thread) {
@@ -91,7 +91,7 @@ function createRunWith(client: Anthropic) {
 }
 
 // Retrieves all messages from a thread
-function listMessagesWith(_client: Anthropic) {
+function listMessagesWith() {
   return async function (threadId: string) {
     const thread = threadsStore.get(threadId);
 
@@ -124,10 +124,10 @@ export function claudeClient(apiKey: string) {
 
   // Return object with all available operations
   return {
-    createThread: createThreadWith(anthropic),
-    createMessageInThread: createMessageInThreadWith(anthropic),
+    createThread: createThreadWith(),
+    createMessageInThread: createMessageInThreadWith(),
     createRun: createRunWith(anthropic),
-    listMessages: listMessagesWith(anthropic),
+    listMessages: listMessagesWith(),
   };
 }
 

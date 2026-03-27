@@ -1,20 +1,20 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 
-import { azureOpenaiClient } from "./azure/threads";
-import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
+import { anthropicBedrockClient, Message as BedrockMessage } from "./bedrock/thread";
 
 import { v4 as uuidv4 } from "uuid";
 
 import {
-  API_KEY,
-  ASSISTANT_ID,
-  ENDPOINT,
-  API_VERSION,
-  DEPLOYMENT,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  BEDROCK_AWS_REGION,
+  BEDROCK_MAX_TOKENS,
+  BEDROCK_MODEL_ID,
 } from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
 import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
+import { BUDDHA_PROMPT_TEMPLATE } from "./prompts/promptTemplate";
 
 import appBackground from "./assets/buddha-bg-img.jpg";
 import videoBackground from "./assets/buddha-bg.mp4";
@@ -33,11 +33,27 @@ type TMessage = {
 
 type TextSizeOption = "small" | "medium" | "large";
 
-const assistant = azureOpenaiClient(API_KEY, ENDPOINT, API_VERSION, DEPLOYMENT);
+const bedrockAuth =
+  AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
+    ? {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      }
+    : undefined;
+
+const assistant =
+  BEDROCK_AWS_REGION && BEDROCK_MODEL_ID
+    ? anthropicBedrockClient(BEDROCK_AWS_REGION, BEDROCK_MODEL_ID, {
+        auth: bedrockAuth,
+        maxTokens: BEDROCK_MAX_TOKENS,
+        system: BUDDHA_PROMPT_TEMPLATE,
+      })
+    : undefined;
 
 function App() {
-  const [threadId, setThreadId] = useState<string | undefined>();
   const [messages, setMessages] = useState<TMessage[]>([]);
+  const [bedrockHistory, setBedrockHistory] = useState<BedrockMessage[]>([]);
+  const [integrationError, setIntegrationError] = useState<string | undefined>();
   const [appInitializing, setAppInitializing] = useState(true);
   const [loadingAssistantResponse, setLoadingAssistantResponse] =
     useState(false);
@@ -50,9 +66,9 @@ function App() {
 
   const greeting = GREETING_TEXT;
 
-  const init = async () => {
+  const init = useCallback(async () => {
     setAppInitializing(true);
-    const thread = await assistant.createThread();
+    setIntegrationError(undefined);
 
     if (greeting) {
       setMessages([
@@ -64,13 +80,37 @@ function App() {
       ]);
     }
 
-    setThreadId(thread.id);
+    if (!assistant) {
+      const message =
+        "Bedrock is not configured. Set VITE_BEDROCK_AWS_REGION and VITE_BEDROCK_MODEL_ID.";
+      setIntegrationError(message);
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: uuidv4(),
+          role: "assistant",
+          content: `**Error:** ${message}`,
+          format: "markdown",
+        },
+      ]);
+      setAppInitializing(false);
+      return;
+    }
+
+    try {
+      const history = assistant.createThread();
+      setBedrockHistory(history);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to initialize Bedrock.";
+      setIntegrationError(message);
+    }
     setAppInitializing(false);
-  };
+  }, [greeting]);
 
   useEffect(() => {
     init();
-  }, []);
+  }, [init]);
 
   useEffect(() => {
     if (chatboxRef.current) {
@@ -94,47 +134,23 @@ function App() {
   };
 
   const sendMessageAndGetResponse = async (message: string) => {
-    if (threadId !== undefined) {
-      await sendAndProcess();
-      const response = await getResponse();
-      return response;
-      // return await getResponse();
+    if (!assistant) {
+      throw new Error(
+        "Bedrock is not configured. Set VITE_BEDROCK_AWS_REGION and VITE_BEDROCK_MODEL_ID.",
+      );
     }
 
-    async function sendAndProcess() {
-      if (threadId !== undefined) {
-        await assistant.createMessageInThread(threadId, message);
-        await assistant.createRun(threadId, ASSISTANT_ID);
-      }
-    }
-
-    async function getResponse() {
-      if (threadId !== undefined) {
-        const allMessagesInThread = await assistant.listMessages(threadId);
-        const lastResponse = allMessagesInThread.data[0]
-          .content[0] as unknown as TextContentBlock;
-        return lastResponse.text.value;
-      }
-    }
-
-    // async function getResponse() {
-    //   if (threadId !== undefined) {
-    //     const allMessagesInThread = await assistant.listMessages(threadId);
-
-    //     // Ensure data exists and has the expected structure (for Claude)
-    //     const lastMessage = allMessagesInThread?.data?.slice(-1)[0];
-    //     if (!lastMessage || !lastMessage.content?.[0]?.text) {
-    //       console.error("Error: Response structure is unexpected or missing.");
-    //       return "I'm sorry, I could not process your message.";
-    //     }
-
-    //     return lastMessage.content[0].text;
-    //   }
-    // }
+    const { text, updatedHistory } = await assistant.sendMessage(
+      bedrockHistory,
+      message,
+    );
+    setBedrockHistory(updatedHistory);
+    return text;
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIntegrationError(undefined);
     setMessages((currentMessages) => [
       ...currentMessages,
       {
@@ -145,12 +161,22 @@ function App() {
     ]);
     setUserInput("");
     setLoadingAssistantResponse(true);
-    const assistantResponse = await sendMessageAndGetResponse(userInput);
+    let assistantResponse: string;
+    try {
+      assistantResponse = (await sendMessageAndGetResponse(userInput)) as string;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unexpected error calling Bedrock.";
+      setIntegrationError(message);
+      assistantResponse = `**Error:** ${message}`;
+    }
     setMessages((currentMessages) => [
       ...currentMessages,
       {
         id: uuidv4(),
-        content: assistantResponse as string,
+        content: assistantResponse,
         role: "assistant",
         format: "markdown",
       },
@@ -161,6 +187,7 @@ function App() {
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setMessages([]);
+    setBedrockHistory([]);
     await init();
   };
 
@@ -224,7 +251,7 @@ function App() {
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                disabled={loadingAssistantResponse}
+                disabled={loadingAssistantResponse || !!integrationError}
                 placeholder="What would you like to ask Buddha today?"
                 ref={inputRef}
               />
@@ -232,7 +259,7 @@ function App() {
                 type="submit"
                 className="submit-chat"
                 title="Submit"
-                disabled={loadingAssistantResponse}
+                disabled={loadingAssistantResponse || !!integrationError}
               ></button>
               <button
                 type="button"
@@ -244,7 +271,7 @@ function App() {
           </div>
         </div>
         <div className="screen-disclaimer">
-          <p>{DISCLAIMER_TEXT}</p>
+          <p>{integrationError ?? DISCLAIMER_TEXT}</p>
         </div>
       </div>
     </>
