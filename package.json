@@ -11,7 +11,6 @@
     "format": "prettier --write \"./**/*.{tsx,ts,json,md}\""
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
     "@aws-sdk/client-bedrock-runtime": "^3.864.0",
     "prettier": "3.2.5",
     "react": "18.2.0",
