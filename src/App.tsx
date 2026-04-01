@@ -1,20 +1,9 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
-
-import { anthropicBedrockClient, Message as BedrockMessage } from "./bedrock/thread";
-
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY,
-  BEDROCK_AWS_REGION,
-  BEDROCK_MAX_TOKENS,
-  BEDROCK_MODEL_ID,
-} from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
-import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
-import { BUDDHA_PROMPT_TEMPLATE } from "./prompts/promptTemplate";
+import {DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
 
 import appBackground from "./assets/buddha-bg-img.jpg";
 import videoBackground from "./assets/buddha-bg.mp4";
@@ -33,26 +22,11 @@ type TMessage = {
 
 type TextSizeOption = "small" | "medium" | "large";
 
-const bedrockAuth =
-  AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
-    ? {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
-      }
-    : undefined;
-
-const assistant =
-  BEDROCK_AWS_REGION && BEDROCK_MODEL_ID
-    ? anthropicBedrockClient(BEDROCK_AWS_REGION, BEDROCK_MODEL_ID, {
-        auth: bedrockAuth,
-        maxTokens: BEDROCK_MAX_TOKENS,
-        system: BUDDHA_PROMPT_TEMPLATE,
-      })
-    : undefined;
+const API_URL = import.meta.env.VITE_CHAT_API_URL;
+const API_KEY = import.meta.env.VITE_CHAT_API_KEY;
 
 function App() {
   const [messages, setMessages] = useState<TMessage[]>([]);
-  const [bedrockHistory, setBedrockHistory] = useState<BedrockMessage[]>([]);
   const [integrationError, setIntegrationError] = useState<string | undefined>();
   const [appInitializing, setAppInitializing] = useState(true);
   const [loadingAssistantResponse, setLoadingAssistantResponse] =
@@ -66,6 +40,7 @@ function App() {
 
   const greeting = GREETING_TEXT;
 
+  // ✅ Initialize app
   const init = useCallback(async () => {
     setAppInitializing(true);
     setIntegrationError(undefined);
@@ -76,35 +51,11 @@ function App() {
           id: uuidv4(),
           role: "assistant",
           content: greeting,
-        },
-      ]);
-    }
-
-    if (!assistant) {
-      const message =
-        "Bedrock is not configured. Set VITE_BEDROCK_AWS_REGION and VITE_BEDROCK_MODEL_ID.";
-      setIntegrationError(message);
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: uuidv4(),
-          role: "assistant",
-          content: `**Error:** ${message}`,
           format: "markdown",
         },
       ]);
-      setAppInitializing(false);
-      return;
     }
 
-    try {
-      const history = assistant.createThread();
-      setBedrockHistory(history);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to initialize Bedrock.";
-      setIntegrationError(message);
-    }
     setAppInitializing(false);
   }, [greeting]);
 
@@ -126,52 +77,80 @@ function App() {
 
   const handleTextSizeChange = (size: TextSizeOption) => {
     setTextSize(size);
-    // Apply text size to the document
     document.documentElement.style.setProperty(
       "--text-size-factor",
-      size === "small" ? "0.875" : size === "large" ? "1.125" : "1",
+      size === "small" ? "0.875" : size === "large" ? "1.125" : "1"
     );
   };
 
-  const sendMessageAndGetResponse = async (message: string) => {
-    if (!assistant) {
-      throw new Error(
-        "Bedrock is not configured. Set VITE_BEDROCK_AWS_REGION and VITE_BEDROCK_MODEL_ID.",
-      );
+  // ✅ API call
+  const callChatAPI = async (messages: TMessage[]) => {
+    if (!API_URL) {
+      throw new Error("API URL not configured in .env");
     }
 
-    const { text, updatedHistory } = await assistant.sendMessage(
-      bedrockHistory,
-      message,
-    );
-    setBedrockHistory(updatedHistory);
-    return text;
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         "api-key": API_KEY, 
+      },
+      body: JSON.stringify({
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch response from API");
+    }
+
+    if (!response.ok) {
+    throw new Error("Failed to fetch response from API");
+  }
+  // ✅ Parse JSON instead of text
+  const data = await response.json();
+  
+  const formatted_text = data.replace(/\\n/g, "\n");
+
+  return formatted_text;
   };
 
+  // ✅ Handle submit
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIntegrationError(undefined);
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: uuidv4(),
-        content: userInput,
-        role: "user",
-      },
-    ]);
+
+    if (!userInput.trim()) return;
+
+    const newUserMessage: TMessage = {
+      id: uuidv4(),
+      content: userInput,
+      role: "user",
+    };
+
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
+
     setUserInput("");
     setLoadingAssistantResponse(true);
+
     let assistantResponse: string;
+
     try {
-      assistantResponse = (await sendMessageAndGetResponse(userInput)) as string;
+      assistantResponse = await callChatAPI(updatedMessages);
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Unexpected error calling Bedrock.";
+          : "Unexpected error calling API.";
       setIntegrationError(message);
       assistantResponse = `**Error:** ${message}`;
     }
+
+    // ✅ Append assistant response
     setMessages((currentMessages) => [
       ...currentMessages,
       {
@@ -181,13 +160,14 @@ function App() {
         format: "markdown",
       },
     ]);
+
     setLoadingAssistantResponse(false);
   };
 
+  // ✅ Clear chat
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setMessages([]);
-    setBedrockHistory([]);
     await init();
   };
 
@@ -198,6 +178,7 @@ function App() {
         onTextSizeChange={handleTextSizeChange}
         currentTextSize={textSize}
       />
+
       <div
         className={`screen ${appInitializing ? "loading" : ""} background-image`}
         style={!videoLoaded ? { backgroundImage: `url(${appBackground})` } : {}}
@@ -210,7 +191,6 @@ function App() {
             muted
             playsInline
             poster={appBackground}
-            // style={{ zIndex: 1 }}
             onError={() => setVideoLoaded(false)}
           >
             <source src={videoBackground} type="video/mp4" />
@@ -231,6 +211,7 @@ function App() {
                       {ROLE_LABELS[message.role]}
                     </h4>
                   </div>
+
                   <div className="message-content">
                     {message.format === "markdown" ? (
                       <Markdown>{message.content}</Markdown>
@@ -240,12 +221,14 @@ function App() {
                   </div>
                 </div>
               ))}
+
               {loadingAssistantResponse && (
-                <div className={`message curved assistant`}>
+                <div className="message curved assistant">
                   <TypingIndicator />
                 </div>
               )}
             </div>
+
             <form id="chat-form" onSubmit={handleSubmit} className="curved">
               <input
                 type="text"
@@ -255,12 +238,14 @@ function App() {
                 placeholder="What would you like to ask Buddha today?"
                 ref={inputRef}
               />
+
               <button
                 type="submit"
                 className="submit-chat"
                 title="Submit"
                 disabled={loadingAssistantResponse || !!integrationError}
               ></button>
+
               <button
                 type="button"
                 className="clear-chat"
@@ -270,6 +255,7 @@ function App() {
             </form>
           </div>
         </div>
+
         <div className="screen-disclaimer">
           <p>{integrationError ?? DISCLAIMER_TEXT}</p>
         </div>
