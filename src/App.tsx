@@ -1,20 +1,9 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
-
-import { azureOpenaiClient } from "./azure/threads";
-import { TextContentBlock } from "openai/resources/beta/threads/messages.mjs";
-
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  API_KEY,
-  ASSISTANT_ID,
-  ENDPOINT,
-  API_VERSION,
-  DEPLOYMENT,
-} from "./constants/config";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
-import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
+import {DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
 
 import appBackground from "./assets/buddha-bg-img.jpg";
 import videoBackground from "./assets/buddha-bg.mp4";
@@ -33,11 +22,12 @@ type TMessage = {
 
 type TextSizeOption = "small" | "medium" | "large";
 
-const assistant = azureOpenaiClient(API_KEY, ENDPOINT, API_VERSION, DEPLOYMENT);
+const API_URL = import.meta.env.VITE_CHAT_API_URL;
+const API_KEY = import.meta.env.VITE_CHAT_API_KEY;
 
 function App() {
-  const [threadId, setThreadId] = useState<string | undefined>();
   const [messages, setMessages] = useState<TMessage[]>([]);
+  const [integrationError, setIntegrationError] = useState<string | undefined>();
   const [appInitializing, setAppInitializing] = useState(true);
   const [loadingAssistantResponse, setLoadingAssistantResponse] =
     useState(false);
@@ -50,9 +40,10 @@ function App() {
 
   const greeting = GREETING_TEXT;
 
-  const init = async () => {
+  // ✅ Initialize app
+  const init = useCallback(async () => {
     setAppInitializing(true);
-    const thread = await assistant.createThread();
+    setIntegrationError(undefined);
 
     if (greeting) {
       setMessages([
@@ -60,17 +51,17 @@ function App() {
           id: uuidv4(),
           role: "assistant",
           content: greeting,
+          format: "markdown",
         },
       ]);
     }
 
-    setThreadId(thread.id);
     setAppInitializing(false);
-  };
+  }, [greeting]);
 
   useEffect(() => {
     init();
-  }, []);
+  }, [init]);
 
   useEffect(() => {
     if (chatboxRef.current) {
@@ -86,78 +77,94 @@ function App() {
 
   const handleTextSizeChange = (size: TextSizeOption) => {
     setTextSize(size);
-    // Apply text size to the document
     document.documentElement.style.setProperty(
       "--text-size-factor",
-      size === "small" ? "0.875" : size === "large" ? "1.125" : "1",
+      size === "small" ? "0.875" : size === "large" ? "1.125" : "1"
     );
   };
 
-  const sendMessageAndGetResponse = async (message: string) => {
-    if (threadId !== undefined) {
-      await sendAndProcess();
-      const response = await getResponse();
-      return response;
-      // return await getResponse();
+  // ✅ API call
+  const callChatAPI = async (messages: TMessage[]) => {
+    if (!API_URL) {
+      throw new Error("API URL not configured in .env");
     }
 
-    async function sendAndProcess() {
-      if (threadId !== undefined) {
-        await assistant.createMessageInThread(threadId, message);
-        await assistant.createRun(threadId, ASSISTANT_ID);
-      }
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         "api-key": API_KEY, 
+      },
+      body: JSON.stringify({
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch response from API");
     }
 
-    async function getResponse() {
-      if (threadId !== undefined) {
-        const allMessagesInThread = await assistant.listMessages(threadId);
-        const lastResponse = allMessagesInThread.data[0]
-          .content[0] as unknown as TextContentBlock;
-        return lastResponse.text.value;
-      }
-    }
+    if (!response.ok) {
+    throw new Error("Failed to fetch response from API");
+  }
+  // ✅ Parse JSON instead of text
+  const data = await response.json();
+  
+  const formatted_text = data.replace(/\\n/g, "\n");
 
-    // async function getResponse() {
-    //   if (threadId !== undefined) {
-    //     const allMessagesInThread = await assistant.listMessages(threadId);
-
-    //     // Ensure data exists and has the expected structure (for Claude)
-    //     const lastMessage = allMessagesInThread?.data?.slice(-1)[0];
-    //     if (!lastMessage || !lastMessage.content?.[0]?.text) {
-    //       console.error("Error: Response structure is unexpected or missing.");
-    //       return "I'm sorry, I could not process your message.";
-    //     }
-
-    //     return lastMessage.content[0].text;
-    //   }
-    // }
+  return formatted_text;
   };
 
+  // ✅ Handle submit
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: uuidv4(),
-        content: userInput,
-        role: "user",
-      },
-    ]);
+    setIntegrationError(undefined);
+
+    if (!userInput.trim()) return;
+
+    const newUserMessage: TMessage = {
+      id: uuidv4(),
+      content: userInput,
+      role: "user",
+    };
+
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
+
     setUserInput("");
     setLoadingAssistantResponse(true);
-    const assistantResponse = await sendMessageAndGetResponse(userInput);
+
+    let assistantResponse: string;
+
+    try {
+      assistantResponse = await callChatAPI(updatedMessages);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unexpected error calling API.";
+      setIntegrationError(message);
+      assistantResponse = `**Error:** ${message}`;
+    }
+
+    // ✅ Append assistant response
     setMessages((currentMessages) => [
       ...currentMessages,
       {
         id: uuidv4(),
-        content: assistantResponse as string,
+        content: assistantResponse,
         role: "assistant",
         format: "markdown",
       },
     ]);
+
     setLoadingAssistantResponse(false);
   };
 
+  // ✅ Clear chat
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setMessages([]);
@@ -171,6 +178,7 @@ function App() {
         onTextSizeChange={handleTextSizeChange}
         currentTextSize={textSize}
       />
+
       <div
         className={`screen ${appInitializing ? "loading" : ""} background-image`}
         style={!videoLoaded ? { backgroundImage: `url(${appBackground})` } : {}}
@@ -183,7 +191,6 @@ function App() {
             muted
             playsInline
             poster={appBackground}
-            // style={{ zIndex: 1 }}
             onError={() => setVideoLoaded(false)}
           >
             <source src={videoBackground} type="video/mp4" />
@@ -204,6 +211,7 @@ function App() {
                       {ROLE_LABELS[message.role]}
                     </h4>
                   </div>
+
                   <div className="message-content">
                     {message.format === "markdown" ? (
                       <Markdown>{message.content}</Markdown>
@@ -213,27 +221,31 @@ function App() {
                   </div>
                 </div>
               ))}
+
               {loadingAssistantResponse && (
-                <div className={`message curved assistant`}>
+                <div className="message curved assistant">
                   <TypingIndicator />
                 </div>
               )}
             </div>
+
             <form id="chat-form" onSubmit={handleSubmit} className="curved">
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                disabled={loadingAssistantResponse}
+                disabled={loadingAssistantResponse || !!integrationError}
                 placeholder="What would you like to ask Buddha today?"
                 ref={inputRef}
               />
+
               <button
                 type="submit"
                 className="submit-chat"
                 title="Submit"
-                disabled={loadingAssistantResponse}
+                disabled={loadingAssistantResponse || !!integrationError}
               ></button>
+
               <button
                 type="button"
                 className="clear-chat"
@@ -243,8 +255,9 @@ function App() {
             </form>
           </div>
         </div>
+
         <div className="screen-disclaimer">
-          <p>{DISCLAIMER_TEXT}</p>
+          <p>{integrationError ?? DISCLAIMER_TEXT}</p>
         </div>
       </div>
     </>

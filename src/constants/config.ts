@@ -1,8 +1,2 @@
-export const API_KEY: string = import.meta.env.VITE_OPENAI_API_KEY;
-export const ASSISTANT_ID: string = import.meta.env.VITE_OPENAI_ASSISTANT_ID;
-
-// export const API_KEY: string = import.meta.env.VITE_CLAUDE_API_KEY;
-export const ENDPOINT = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
-// export const apiKey = import.meta.env.VITE_AZURE_OPENAI_API_KEY;
-export const API_VERSION = import.meta.env.VITE_OPENAI_API_VERSION;
-export const DEPLOYMENT = import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT;
+export const API_URL = import.meta.env.VITE_CHAT_API_URL as string | undefined;
+export const API_KEY = import.meta.env.VITE_CHAT_API_KEY as string | undefined;
