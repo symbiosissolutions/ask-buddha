@@ -3,7 +3,7 @@ import Markdown from "react-markdown";
 import { v4 as uuidv4 } from "uuid";
 
 import { ROLES, ROLE_LABELS } from "./constants/enums";
-import {DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
+import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
 
 import appBackground from "./assets/buddha-bg-img.jpg";
 import videoBackground from "./assets/buddha-bg.mp4";
@@ -45,7 +45,10 @@ function App() {
     setAppInitializing(true);
     setIntegrationError(undefined);
 
-    if (greeting) {
+    const savedMessages = localStorage.getItem("ask-buddha-messages");
+    if (savedMessages && JSON.parse(savedMessages).length > 0) {
+      setMessages(JSON.parse(savedMessages));
+    } else if (greeting) {
       setMessages([
         {
           id: uuidv4(),
@@ -62,6 +65,13 @@ function App() {
   useEffect(() => {
     init();
   }, [init]);
+
+  // ✅ Save messages to local storage
+  useEffect(() => {
+    if (!appInitializing) {
+      localStorage.setItem("ask-buddha-messages", JSON.stringify(messages));
+    }
+  }, [messages, appInitializing]);
 
   useEffect(() => {
     if (chatboxRef.current) {
@@ -93,7 +103,7 @@ function App() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-         "api-key": API_KEY, 
+        "api-key": API_KEY,
       },
       body: JSON.stringify({
         messages: messages.map((m) => ({
@@ -106,16 +116,12 @@ function App() {
     if (!response.ok) {
       throw new Error("Failed to fetch response from API");
     }
+    // ✅ Parse JSON instead of text
+    const data = await response.json();
 
-    if (!response.ok) {
-    throw new Error("Failed to fetch response from API");
-  }
-  // ✅ Parse JSON instead of text
-  const data = await response.json();
-  
-  const formatted_text = data.replace(/\\n/g, "\n");
+    const formatted_text = data.replace(/\\n/g, "\n");
 
-  return formatted_text;
+    return formatted_text;
   };
 
   // ✅ Handle submit
@@ -167,6 +173,7 @@ function App() {
   // ✅ Clear chat
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    localStorage.removeItem("ask-buddha-messages");
     setMessages([]);
     await init();
   };
