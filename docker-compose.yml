@@ -1,0 +1,10 @@
+services:
+  ask-buddha:
+    build:
+      context: .
+      args:
+        VITE_CHAT_API_URL: ${VITE_CHAT_API_URL}
+        VITE_CHAT_API_KEY: ${VITE_CHAT_API_KEY}
+    ports:
+      - "3005:80"
+    restart: unless-stopped
