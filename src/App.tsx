@@ -5,8 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ROLES, ROLE_LABELS } from "./constants/enums";
 import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
 
-import appBackground from "./assets/buddha-bg-img.jpg";
-import videoBackground from "./assets/buddha-bg.mp4";
+import appBackground from "./assets/ask-buddha-bg-min.jpg";
 
 import "./App.css";
 
@@ -35,7 +34,6 @@ function App() {
 
   const chatboxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [videoLoaded, setVideoLoaded] = useState(true);
   const [textSize, setTextSize] = useState<TextSizeOption>("medium");
 
   const greeting = GREETING_TEXT;
@@ -188,22 +186,8 @@ function App() {
 
       <div
         className={`screen ${appInitializing ? "loading" : ""} background-image`}
-        style={!videoLoaded ? { backgroundImage: `url(${appBackground})` } : {}}
+        style={{ backgroundImage: `url(${appBackground})` }}
       >
-        {videoLoaded && (
-          <video
-            className="background-video"
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster={appBackground}
-            onError={() => setVideoLoaded(false)}
-          >
-            <source src={videoBackground} type="video/mp4" />
-          </video>
-        )}
-
         <div className="screen-main">
           <div className="chat-section">
             <div className="chatbox curved custom-scroll" ref={chatboxRef}>
@@ -250,7 +234,7 @@ function App() {
                 type="submit"
                 className="submit-chat"
                 title="Submit"
-                disabled={loadingAssistantResponse || !!integrationError}
+                disabled={loadingAssistantResponse || !!integrationError || !userInput.trim()}
               ></button>
 
               <button

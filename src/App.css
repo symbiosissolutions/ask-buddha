@@ -117,19 +117,23 @@ p {
 /* Styling the scrollbar */
 
 .custom-scroll::-webkit-scrollbar {
-  width: 15px; /* Width of the scrollbar */
+  width: 15px;
+  /* Width of the scrollbar */
 }
 
 .custom-scroll::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(5px);
-  border-radius: 10px; /* Match the border-radius of the div */
-  margin: 8px 0; /* Adds top and bottom padding */
+  border-radius: 10px;
+  /* Match the border-radius of the div */
+  margin: 8px 0;
+  /* Adds top and bottom padding */
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
   background: rgba(241, 241, 241, 0.9);
-  border-radius: 10px; /* Rounded corners for the scrollbar */
+  border-radius: 10px;
+  /* Rounded corners for the scrollbar */
   border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
   transition: background-color 0.3s ease;
@@ -160,22 +164,18 @@ p {
 
 .message.user {
   margin-left: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 202, 105, 0.45),
-    rgba(220, 172, 83, 0.58)
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 202, 105, 0.45),
+      rgba(220, 172, 83, 0.58));
   border: 1px solid rgba(255, 200, 100, 0.25);
   box-shadow: 0 2px 8px rgba(255, 165, 0, 0.15);
 }
 
 .message.assistant {
   margin-right: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(173, 216, 230, 0.7),
-    rgba(231, 188, 231, 0.78)
-  );
+  background: linear-gradient(135deg,
+      rgba(173, 216, 230, 0.7),
+      rgba(231, 188, 231, 0.78));
   border: 1px solid rgba(173, 216, 230, 0.5);
   box-shadow: 0 4px 16px rgba(173, 216, 230, 0.4);
 }
@@ -256,9 +256,15 @@ p {
   position: relative;
 }
 
-#chat-form .submit-chat:hover,
-#chat-form .clear-chat:hover {
+#chat-form .submit-chat:hover:not(:disabled),
+#chat-form .clear-chat:hover:not(:disabled) {
   background-color: rgba(254, 253, 234, 0.7);
+}
+
+#chat-form .submit-chat:disabled,
+#chat-form .clear-chat:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 #chat-form .submit-chat::after,
@@ -309,11 +315,13 @@ p {
 }
 
 @keyframes bounce {
+
   0%,
   80%,
   100% {
     transform: scale(0);
   }
+
   40% {
     transform: scale(1);
   }
@@ -326,9 +334,9 @@ p {
   left: -25%;
   min-width: 50%;
   min-height: 100%; */
-  
+
   width: 120vw;
-  height: 130vh;  
+  height: 130vh;
   left: -15%;
   min-width: 100%;
   min-height: 100%;
@@ -358,4 +366,43 @@ p {
 .screen-disclaimer p,
 .message-author-role {
   font-size: calc(var(--text-size-factor) * 1rem);
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+  .chatbox {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .chat-section {
+    margin-right: 0;
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  .message {
+    max-width: 90%;
+    padding: 8px 12px;
+  }
+
+  #chat-form {
+    width: 100%;
+    padding: 0 10px;
+    margin-bottom: 5px;
+  }
+
+  #chat-form input {
+    margin-right: 8px;
+    padding: 0 12px;
+  }
+
+  #chat-form .submit-chat {
+    margin-right: 8px;
+    width: 50px;
+  }
+
+  #chat-form .clear-chat {
+    width: 50px;
+  }
 }
