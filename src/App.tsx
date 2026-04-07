@@ -1,15 +1,14 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import Markdown from "react-markdown";
 import { v4 as uuidv4 } from "uuid";
 
-import { ROLES, ROLE_LABELS } from "./constants/enums";
+import { ROLES } from "./constants/enums";
 import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
-
-import appBackground from "./assets/ask-buddha-bg-min.jpg";
 
 import "./App.css";
 
 import { TypingIndicator } from "./components/TypingIndicator";
+import { MessageBubble } from "./components/MessageBubble";
+import { ChatInput } from "./components/ChatInput";
 import Navbar from "./components/Navbar";
 
 type TMessage = {
@@ -28,8 +27,7 @@ function App() {
   const [messages, setMessages] = useState<TMessage[]>([]);
   const [integrationError, setIntegrationError] = useState<string | undefined>();
   const [appInitializing, setAppInitializing] = useState(true);
-  const [loadingAssistantResponse, setLoadingAssistantResponse] =
-    useState(false);
+  const [loadingAssistantResponse, setLoadingAssistantResponse] = useState(false);
   const [userInput, setUserInput] = useState("");
 
   const chatboxRef = useRef<HTMLDivElement>(null);
@@ -38,7 +36,6 @@ function App() {
 
   const greeting = GREETING_TEXT;
 
-  // ✅ Initialize app
   const init = useCallback(async () => {
     setAppInitializing(true);
     setIntegrationError(undefined);
@@ -64,7 +61,6 @@ function App() {
     init();
   }, [init]);
 
-  // ✅ Save messages to local storage
   useEffect(() => {
     if (!appInitializing) {
       localStorage.setItem("ask-buddha-messages", JSON.stringify(messages));
@@ -91,7 +87,6 @@ function App() {
     );
   };
 
-  // ✅ API call
   const callChatAPI = async (messages: TMessage[]) => {
     if (!API_URL) {
       throw new Error("API URL not configured in .env");
@@ -114,15 +109,11 @@ function App() {
     if (!response.ok) {
       throw new Error("Failed to fetch response from API");
     }
-    // ✅ Parse JSON instead of text
+
     const data = await response.json();
-
-    const formatted_text = data.replace(/\\n/g, "\n");
-
-    return formatted_text;
+    return data.replace(/\\n/g, "\n");
   };
 
-  // ✅ Handle submit
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIntegrationError(undefined);
@@ -137,7 +128,6 @@ function App() {
 
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
-
     setUserInput("");
     setLoadingAssistantResponse(true);
 
@@ -147,16 +137,13 @@ function App() {
       assistantResponse = await callChatAPI(updatedMessages);
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Unexpected error calling API.";
+        error instanceof Error ? error.message : "Unexpected error calling API.";
       setIntegrationError(message);
       assistantResponse = `**Error:** ${message}`;
     }
 
-    // ✅ Append assistant response
-    setMessages((currentMessages) => [
-      ...currentMessages,
+    setMessages((current) => [
+      ...current,
       {
         id: uuidv4(),
         content: assistantResponse,
@@ -168,7 +155,6 @@ function App() {
     setLoadingAssistantResponse(false);
   };
 
-  // ✅ Clear chat
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     localStorage.removeItem("ask-buddha-messages");
@@ -178,72 +164,39 @@ function App() {
 
   return (
     <>
-      {appInitializing ? <div className="loader"></div> : <></>}
-      <Navbar
-        onTextSizeChange={handleTextSizeChange}
-        currentTextSize={textSize}
-      />
+      {appInitializing && <div className="loader" />}
+      <Navbar onTextSizeChange={handleTextSizeChange} currentTextSize={textSize} />
 
-      <div
-        className={`screen ${appInitializing ? "loading" : ""} background-image`}
-        style={{ backgroundImage: `url(${appBackground})` }}
-      >
+      <div className={`screen ${appInitializing ? "loading" : ""}`}>
         <div className="screen-main">
           <div className="chat-section">
-            <div className="chatbox curved custom-scroll" ref={chatboxRef}>
+            <div
+              className="chatbox"
+              ref={chatboxRef}
+              role="log"
+              aria-live="polite"
+              aria-label="Chat messages"
+            >
               {messages.map((message) => (
-                <div
+                <MessageBubble
                   key={message.id}
-                  className={`message curved ${message.role}`}
-                >
-                  <div className="message-author">
-                    <div className="message-author-avatar"></div>
-                    <h4 className="message-author-role">
-                      {ROLE_LABELS[message.role]}
-                    </h4>
-                  </div>
-
-                  <div className="message-content">
-                    {message.format === "markdown" ? (
-                      <Markdown>{message.content}</Markdown>
-                    ) : (
-                      message.content
-                    )}
-                  </div>
-                </div>
+                  role={message.role}
+                  content={message.content}
+                  format={message.format}
+                />
               ))}
 
-              {loadingAssistantResponse && (
-                <div className="message curved assistant">
-                  <TypingIndicator />
-                </div>
-              )}
+              {loadingAssistantResponse && <TypingIndicator />}
             </div>
 
-            <form id="chat-form" onSubmit={handleSubmit} className="curved">
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                disabled={loadingAssistantResponse || !!integrationError}
-                placeholder="What would you like to ask Buddha today?"
-                ref={inputRef}
-              />
-
-              <button
-                type="submit"
-                className="submit-chat"
-                title="Submit"
-                disabled={loadingAssistantResponse || !!integrationError || !userInput.trim()}
-              ></button>
-
-              <button
-                type="button"
-                className="clear-chat"
-                title="Clear Chat"
-                onClick={clearChat}
-              ></button>
-            </form>
+            <ChatInput
+              value={userInput}
+              onChange={setUserInput}
+              onSubmit={handleSubmit}
+              onClear={clearChat}
+              disabled={loadingAssistantResponse || !!integrationError}
+              inputRef={inputRef}
+            />
           </div>
         </div>
 

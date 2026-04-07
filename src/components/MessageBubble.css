@@ -1,0 +1,151 @@
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes avatar-breathe {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 209, 102, 0);
+    border-color: var(--color-gold-dim);
+  }
+  50% {
+    box-shadow: 0 0 10px 3px rgba(255, 209, 102, 0.35);
+    border-color: var(--color-gold-bright);
+  }
+}
+
+.bubble {
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-2) 0;
+  max-width: 80%;
+  font-family: var(--font-body);
+  font-size: calc(var(--text-size-factor) * var(--text-base));
+  animation: bubble-in var(--duration-slow) var(--ease-bounce) both;
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
+}
+
+/* ── Buddha bubble ── */
+.bubble-assistant {
+  background: linear-gradient(135deg, var(--color-bg-surface) 0%, #251a0a 100%);
+  border: 1px solid rgba(160, 120, 48, 0.45);
+  border-left: 3px solid var(--color-gold-bright);
+  border-radius: 4px var(--border-radius-lg) var(--border-radius-lg) var(--border-radius-lg);
+  align-self: flex-start;
+  color: var(--color-text-primary);
+  line-height: var(--leading-loose);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 209, 102, 0.08) inset;
+}
+
+.bubble-assistant:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(255, 209, 102, 0.1);
+}
+
+/* ── User bubble ── */
+.bubble-user {
+  background: var(--gradient-gold-vivid);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 4px var(--border-radius-lg);
+  align-self: flex-end;
+  color: var(--color-text-inverse);
+  font-weight: 600;
+  line-height: var(--leading-normal);
+  box-shadow: 0 4px 20px rgba(255, 209, 102, 0.35);
+  max-width: 72%;
+}
+
+.bubble-user:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 209, 102, 0.5);
+}
+
+/* ── Header (avatar + name) ── */
+.bubble-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.bubble-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 1.5px solid var(--color-gold-dim);
+  background: var(--color-bg-surface);
+  flex-shrink: 0;
+}
+
+/* breathing glow only on the Buddha side */
+.bubble-assistant .bubble-avatar {
+  animation: avatar-breathe var(--duration-breathe) ease-in-out infinite;
+}
+
+.bubble-user .bubble-avatar {
+  border-color: rgba(13, 10, 7, 0.25);
+  background: rgba(13, 10, 7, 0.1);
+}
+
+.bubble-author {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
+
+.bubble-user .bubble-author {
+  color: rgba(13, 10, 7, 0.55);
+}
+
+/* ── Markdown content ── */
+.bubble-content p {
+  margin: 0 0 var(--space-3) 0;
+}
+
+.bubble-content p:last-child {
+  margin-bottom: 0;
+}
+
+.bubble-content strong {
+  color: var(--color-gold-vivid);
+}
+
+.bubble-user .bubble-content strong {
+  color: var(--color-text-inverse);
+}
+
+.bubble-content ul,
+.bubble-content ol {
+  padding-left: var(--space-5);
+  margin: var(--space-2) 0;
+}
+
+.bubble-content li {
+  margin-bottom: var(--space-1);
+}
+
+.bubble-content code {
+  background: rgba(255, 209, 102, 0.15);
+  border-radius: var(--border-radius-sm);
+  padding: 2px 6px;
+  font-size: 0.9em;
+  color: var(--color-gold-vivid);
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .bubble,
+  .bubble-user {
+    max-width: 90%;
+  }
+}
