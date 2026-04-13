@@ -149,3 +149,44 @@
     max-width: 90%;
   }
 }
+
+/* ── Tables ── */
+.bubble-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-3) 0;
+  table-layout: fixed; /* Ensures equal column widths */
+}
+
+.bubble-content th,
+.bubble-content td {
+  border: 1px solid rgba(160, 120, 48, 0.4);
+  padding: var(--space-3) var(--space-2);
+  text-align: center;
+  overflow-wrap: break-word; /* Prevents overflow */
+  vertical-align: middle;
+}
+
+/* Force line break after bold title inside table cells */
+.bubble-content td strong,
+.bubble-content td b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-gold-bright) !important;
+}
+
+.bubble-content th {
+  background: rgba(255, 209, 102, 0.1);
+  font-weight: 600;
+  color: var(--color-gold-bright);
+}
+
+.bubble-user .bubble-content th,
+.bubble-user .bubble-content td {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.bubble-user .bubble-content th {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--color-text-inverse);
+}

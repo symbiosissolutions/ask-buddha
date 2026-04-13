@@ -22,3 +22,5 @@ export const ABOUT_APP_TEXT = `Ask Buddha is your mindful AI companion, helping 
 calm, and insight through thoughtful conversation. Whether you're seeking daily guidance, 
 engaging activities, or a moment of stillness, Ask Buddha adapts to your needs with intelligence
 and compassion.`;
+
+export const CREATE_MIND_MAP_GREETING = `Welcome to Your Mandala Mind Map Journey 🌟\n\nHello! I'm so glad you're here. \n\nI'd like to guide you through a beautiful and reflective process called the **Mandala Mind Map**—a journey of self-exploration that will help you understand the different dimensions of your inner landscape.\n\nOver the next little while, we'll explore **8 meaningful elements**, one at a time. For each element, I'll:\n- Explain what it means\n- Offer you a range of adjectives to reflect on\n- Invite you to choose three that resonate most with how you see yourself\n\nThis is a space for **honest, gentle self-discovery**. There are no right or wrong answers—only your truth.\n\n---\n\n Are you ready to start?`

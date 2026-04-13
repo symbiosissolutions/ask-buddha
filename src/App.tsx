@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { ROLES } from "./constants/enums";
-import { DISCLAIMER_TEXT, GREETING_TEXT } from "./constants/content";
+import { DISCLAIMER_TEXT, GREETING_TEXT, CREATE_MIND_MAP_GREETING } from "./constants/content";
 
 import "./App.css";
 
@@ -19,8 +19,10 @@ type TMessage = {
 };
 
 type TextSizeOption = "small" | "medium" | "large";
+type ActivityType = "chat" | "mind-map";
 
-const API_URL = import.meta.env.VITE_CHAT_API_URL;
+const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL;
+const MIND_MAP_API_URL = import.meta.env.VITE_MIND_MAP_API_URL;
 const API_KEY = import.meta.env.VITE_CHAT_API_KEY;
 
 function App() {
@@ -33,14 +35,16 @@ function App() {
   const chatboxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [textSize, setTextSize] = useState<TextSizeOption>("medium");
-
-  const greeting = GREETING_TEXT;
+  const [currentActivity, setCurrentActivity] = useState<ActivityType>("chat");
 
   const init = useCallback(async () => {
     setAppInitializing(true);
     setIntegrationError(undefined);
 
-    const savedMessages = localStorage.getItem("ask-buddha-messages");
+    const storageKey = `ask-buddha-messages-${currentActivity}`;
+    const savedMessages = localStorage.getItem(storageKey);
+    const greeting = currentActivity === "mind-map" ? CREATE_MIND_MAP_GREETING : GREETING_TEXT;
+
     if (savedMessages && JSON.parse(savedMessages).length > 0) {
       setMessages(JSON.parse(savedMessages));
     } else if (greeting) {
@@ -55,7 +59,7 @@ function App() {
     }
 
     setAppInitializing(false);
-  }, [greeting]);
+  }, [currentActivity]);
 
   useEffect(() => {
     init();
@@ -63,9 +67,10 @@ function App() {
 
   useEffect(() => {
     if (!appInitializing) {
-      localStorage.setItem("ask-buddha-messages", JSON.stringify(messages));
+      const storageKey = `ask-buddha-messages-${currentActivity}`;
+      localStorage.setItem(storageKey, JSON.stringify(messages));
     }
-  }, [messages, appInitializing]);
+  }, [messages, appInitializing, currentActivity]);
 
   useEffect(() => {
     if (chatboxRef.current) {
@@ -88,11 +93,12 @@ function App() {
   };
 
   const callChatAPI = async (messages: TMessage[]) => {
-    if (!API_URL) {
-      throw new Error("API URL not configured in .env");
+    const apiUrl = currentActivity === "mind-map" ? MIND_MAP_API_URL : CHAT_API_URL;
+    if (!apiUrl) {
+      throw new Error(`API URL not configured in .env for ${currentActivity}`);
     }
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,7 +163,8 @@ function App() {
 
   const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    localStorage.removeItem("ask-buddha-messages");
+    const storageKey = `ask-buddha-messages-${currentActivity}`;
+    localStorage.removeItem(storageKey);
     setMessages([]);
     await init();
   };
@@ -165,7 +172,12 @@ function App() {
   return (
     <>
       {appInitializing && <div className="loader" />}
-      <Navbar onTextSizeChange={handleTextSizeChange} currentTextSize={textSize} />
+      <Navbar 
+        onTextSizeChange={handleTextSizeChange} 
+        currentTextSize={textSize} 
+        onActivitySelect={setCurrentActivity}
+        currentActivity={currentActivity}
+      />
 
       <div className={`screen ${appInitializing ? "loading" : ""}`}>
         <div className="screen-main">
