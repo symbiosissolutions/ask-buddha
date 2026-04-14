@@ -1,0 +1,66 @@
+src/hooks/useAccessGuard.ts
+  d8869b42640ae20a 1-41
+src/pages/AdminSessions.tsx
+  d8869b42640ae20a 1-78
+package.json
+  d8869b42640ae20a 19
+src/pages/AdminSessionNew.tsx
+  d8869b42640ae20a 1-191
+src/pages/AdminSessionDetail.tsx
+  d8869b42640ae20a 1-17,19-86,91-93,98-100,105-108,118,123-126,131-179
+  24cd632995742e20 18,87-90,94-97,101-104,109-117,119-122,127-130
+.env.example
+  d8869b42640ae20a 1-10
+src/App.tsx
+  d8869b42640ae20a 1-20,24-54
+src/pages/KeyEntry.tsx
+  d8869b42640ae20a 1-76
+src/pages/admin.css
+  d8869b42640ae20a 1-324,326-352,400-468,483
+  24cd632995742e20 325,353-399,469-482
+src/api/client.ts
+  d8869b42640ae20a 1-97
+src/pages/AdminLogin.tsx
+  d8869b42640ae20a 1-75
+src/components/ProtectedAdminRoute.tsx
+  d8869b42640ae20a 1-8
+src/pages/KeyEntry.css
+  d8869b42640ae20a 1-139
+src/pages/Chat.tsx
+  d8869b42640ae20a 1-257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "73a049a78ea74859d1131cf8994b61524c250430",
+  "prompts": {
+    "24cd632995742e20": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af3249da-1310-4ef8-9dfb-c1f2f834d8e0",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "rashikakarki",
+      "messages": [],
+      "total_additions": 92,
+      "total_deletions": 5,
+      "accepted_lines": 92,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/ea64b1558e775dcdee604b2a0dc175962f1c393551109776ca53270166e8d571"
+    },
+    "d8869b42640ae20a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "517f9568-57e5-4fff-a244-696e31143471",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "rashikakarki",
+      "messages": [],
+      "total_additions": 2173,
+      "total_deletions": 340,
+      "accepted_lines": 2032,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/ed0d632371d8685b9ce8922c99da2f90fa5c218d8b675f949f605693efa0a8c4"
+    }
+  }
+}
