@@ -1,0 +1,139 @@
+.key-entry-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image:
+    linear-gradient(
+      160deg,
+      rgba(13, 10, 7, 0.80) 0%,
+      rgba(26, 15, 5, 0.84) 50%,
+      rgba(16, 12, 5, 0.90) 100%
+    ),
+    url("../assets/ask-buddha-bg-min.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: var(--space-4);
+}
+
+.key-entry-card {
+  background: linear-gradient(145deg, rgba(45, 32, 16, 0.92) 0%, rgba(28, 20, 9, 0.97) 100%);
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-12) var(--space-10);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 209, 102, 0.06);
+  animation: key-card-rise 0.5s var(--ease-smooth) both;
+}
+
+@keyframes key-card-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.key-entry-logo img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: var(--space-4);
+  filter: drop-shadow(0 0 14px rgba(255, 209, 102, 0.45));
+}
+
+.key-entry-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-gold-bright);
+  margin: 0 0 var(--space-2);
+  letter-spacing: var(--tracking-wide);
+  text-shadow: 0 0 28px rgba(255, 209, 102, 0.28);
+}
+
+.key-entry-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-8);
+  line-height: var(--leading-normal);
+}
+
+.key-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.key-entry-input {
+  background: var(--color-bg-elevated);
+  border: 1px solid rgba(255, 209, 102, 0.2);
+  border-radius: var(--border-radius-md);
+  color: var(--color-gold-vivid);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  letter-spacing: 0.3em;
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+  text-transform: uppercase;
+  width: 100%;
+  transition:
+    border-color var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth);
+  outline: none;
+}
+
+.key-entry-input::placeholder {
+  color: var(--color-text-muted);
+  letter-spacing: 0.15em;
+}
+
+.key-entry-input:focus {
+  border-color: rgba(255, 209, 102, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.1);
+}
+
+.key-entry-error {
+  font-size: var(--text-sm);
+  color: var(--color-error);
+  margin: 0;
+  min-height: 1.4em;
+}
+
+.key-entry-btn {
+  background: var(--gradient-gold);
+  border: none;
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  padding: var(--space-4) var(--space-6);
+  transition:
+    opacity var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-bounce);
+  width: 100%;
+}
+
+.key-entry-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.key-entry-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .key-entry-card {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .key-entry-input {
+    font-size: var(--text-lg);
+    letter-spacing: 0.2em;
+  }
+}
