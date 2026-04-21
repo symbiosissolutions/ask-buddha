@@ -22,7 +22,6 @@ type TextSizeOption = "small" | "medium" | "large";
 type ActivityType = "chat" | "mind-map";
 
 const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL;
-const MIND_MAP_API_URL = import.meta.env.VITE_MIND_MAP_API_URL;
 const API_KEY = import.meta.env.VITE_CHAT_API_KEY;
 
 function App() {
@@ -93,9 +92,11 @@ function App() {
   };
 
   const callChatAPI = async (messages: TMessage[]) => {
-    const apiUrl = currentActivity === "mind-map" ? MIND_MAP_API_URL : CHAT_API_URL;
-    if (!apiUrl) {
-      throw new Error(`API URL not configured in .env for ${currentActivity}`);
+    const action = currentActivity === "mind-map" ? "mind_map" : "chat";
+    const apiUrl = `${CHAT_API_URL}/${action}`;
+    
+    if (!CHAT_API_URL) {
+      throw new Error(`API URL not configured in .env`);
     }
 
     const response = await fetch(apiUrl, {
