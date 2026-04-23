@@ -12,7 +12,7 @@ export interface Activity {
 export const ACTIVITIES: Activity[] = [
   {
     id: "chat",
-    label: "Chat with Budhha",
+    label: "Chat with Buddha",
     description: "Converse with the Buddha for guidance and peace.",
     imagePath: "/src/assets/activities/chat.jpg",
     altText: "A peaceful Buddha statue in meditation",
