@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { ROLES } from "./constants/enums";
-import { DISCLAIMER_TEXT, GREETING_TEXT, CREATE_MIND_MAP_GREETING } from "./constants/content";
+import { DISCLAIMER_TEXT, GREETING_TEXT, CREATE_MIND_MAP_GREETING} from "./constants/content";
 
 import "./App.css";
 
@@ -10,6 +10,9 @@ import { TypingIndicator } from "./components/TypingIndicator";
 import { MessageBubble } from "./components/MessageBubble";
 import { ChatInput } from "./components/ChatInput";
 import Navbar from "./components/Navbar";
+import DiscoverPanel from "./components/DiscoverPanel";
+import SidebarRail from "./components/SidebarRail";
+import { ActivityType } from "./constants/activities";
 
 type TMessage = {
   id: string;
@@ -19,46 +22,58 @@ type TMessage = {
 };
 
 type TextSizeOption = "small" | "medium" | "large";
-type ActivityType = "chat" | "mind-map";
 
 const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL;
 const API_KEY = import.meta.env.VITE_CHAT_API_KEY;
 
 function App() {
-  const [messages, setMessages] = useState<TMessage[]>([]);
+  const [allMessages, setAllMessages] = useState<Record<ActivityType, TMessage[]>>({
+    chat: [],
+    "mind-map": [],
+  });
   const [integrationError, setIntegrationError] = useState<string | undefined>();
   const [appInitializing, setAppInitializing] = useState(true);
-  const [loadingAssistantResponse, setLoadingAssistantResponse] = useState(false);
+  const [loadingActivities, setLoadingActivities] = useState<Set<ActivityType>>(new Set());
   const [userInput, setUserInput] = useState("");
 
   const chatboxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [textSize, setTextSize] = useState<TextSizeOption>("medium");
   const [currentActivity, setCurrentActivity] = useState<ActivityType>("chat");
+  const [isDiscoverOpen, setIsDiscoverOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const init = useCallback(async () => {
     setAppInitializing(true);
     setIntegrationError(undefined);
 
-    const storageKey = `ask-buddha-messages-${currentActivity}`;
-    const savedMessages = localStorage.getItem(storageKey);
-    const greeting = currentActivity === "mind-map" ? CREATE_MIND_MAP_GREETING : GREETING_TEXT;
+    const activities: ActivityType[] = ["chat", "mind-map"];
+    const loadedMessages: Record<ActivityType, TMessage[]> = { chat: [], "mind-map": [] };
 
-    if (savedMessages && JSON.parse(savedMessages).length > 0) {
-      setMessages(JSON.parse(savedMessages));
-    } else if (greeting) {
-      setMessages([
-        {
-          id: uuidv4(),
-          role: "assistant",
-          content: greeting,
-          format: "markdown",
-        },
-      ]);
-    }
+    activities.forEach((act) => {
+      const storageKey = `ask-buddha-messages-${act}`;
+      const saved = localStorage.getItem(storageKey);
+      const greeting = act === "mind-map" ? CREATE_MIND_MAP_GREETING : GREETING_TEXT;
 
+      if (saved && JSON.parse(saved).length > 0) {
+        loadedMessages[act] = JSON.parse(saved);
+      } else if (greeting) {
+        loadedMessages[act] = [
+          {
+            id: uuidv4(),
+            role: "assistant",
+            content: greeting,
+            format: "markdown",
+          },
+        ];
+      }
+    });
+
+    setAllMessages(loadedMessages);
     setAppInitializing(false);
-  }, [currentActivity]);
+  }, []);
+
+  const messages = allMessages[currentActivity] || [];
 
   useEffect(() => {
     init();
@@ -66,10 +81,11 @@ function App() {
 
   useEffect(() => {
     if (!appInitializing) {
-      const storageKey = `ask-buddha-messages-${currentActivity}`;
-      localStorage.setItem(storageKey, JSON.stringify(messages));
+      Object.entries(allMessages).forEach(([act, msgs]) => {
+        localStorage.setItem(`ask-buddha-messages-${act}`, JSON.stringify(msgs));
+      });
     }
-  }, [messages, appInitializing, currentActivity]);
+  }, [allMessages, appInitializing]);
 
   useEffect(() => {
     if (chatboxRef.current) {
@@ -78,10 +94,10 @@ function App() {
   }, [messages]);
 
   useEffect(() => {
-    if (!appInitializing && !loadingAssistantResponse) {
+    if (!appInitializing && !loadingActivities.has(currentActivity)) {
       inputRef.current?.focus();
     }
-  }, [appInitializing, loadingAssistantResponse]);
+  }, [appInitializing, loadingActivities, currentActivity]);
 
   const handleTextSizeChange = (size: TextSizeOption) => {
     setTextSize(size);
@@ -133,10 +149,16 @@ function App() {
       role: "user",
     };
 
+    const activityAtStart = currentActivity;
     const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
+    
+    setAllMessages(prev => ({
+      ...prev,
+      [activityAtStart]: updatedMessages
+    }));
+    
     setUserInput("");
-    setLoadingAssistantResponse(true);
+    setLoadingActivities(prev => new Set(prev).add(activityAtStart));
 
     let assistantResponse: string;
 
@@ -149,67 +171,89 @@ function App() {
       assistantResponse = `**Error:** ${message}`;
     }
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: uuidv4(),
-        content: assistantResponse,
-        role: "assistant",
-        format: "markdown",
-      },
-    ]);
+    const assistantMsg: TMessage = {
+      id: uuidv4(),
+      content: assistantResponse,
+      role: "assistant",
+      format: "markdown",
+    };
 
-    setLoadingAssistantResponse(false);
+    setAllMessages(prev => ({
+      ...prev,
+      [activityAtStart]: [...prev[activityAtStart], assistantMsg]
+    }));
+
+    setLoadingActivities(prev => {
+      const next = new Set(prev);
+      next.delete(activityAtStart);
+      return next;
+    });
   };
 
-  const clearChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const clearChat = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    if (e) e.preventDefault();
     const storageKey = `ask-buddha-messages-${currentActivity}`;
     localStorage.removeItem(storageKey);
-    setMessages([]);
+    setAllMessages(prev => ({
+      ...prev,
+      [currentActivity]: []
+    }));
     await init();
   };
 
   return (
     <>
       {appInitializing && <div className="loader" />}
-      <Navbar 
-        onTextSizeChange={handleTextSizeChange} 
-        currentTextSize={textSize} 
-        onActivitySelect={setCurrentActivity}
-        currentActivity={currentActivity}
-      />
 
       <div className={`screen ${appInitializing ? "loading" : ""}`}>
-        <div className="screen-main">
-          <div className="chat-section">
-            <div
-              className="chatbox"
-              ref={chatboxRef}
-              role="log"
-              aria-live="polite"
-              aria-label="Chat messages"
-            >
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  role={message.role}
-                  content={message.content}
-                  format={message.format}
-                />
-              ))}
+        <Navbar 
+          onTextSizeChange={handleTextSizeChange} 
+          currentTextSize={textSize} 
+        />
+        <div className={`main-container${isSidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+          <SidebarRail 
+            isDiscoverOpen={isDiscoverOpen}
+            onToggleDiscover={() => setIsDiscoverOpen(!isDiscoverOpen)}
+            onHomeClick={() => { setCurrentActivity('chat'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            onNewChatClick={() => clearChat()}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapsed={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          />
+          <DiscoverPanel 
+            currentActivity={currentActivity} 
+            onActivitySelect={setCurrentActivity} 
+            isOpen={isDiscoverOpen}
+          />
+          <div className="screen-main">
+            <div className="chat-section">
+              <div
+                className="chatbox"
+                ref={chatboxRef}
+                role="log"
+                aria-live="polite"
+                aria-label="Chat messages"
+              >
+                {messages.map((message) => (
+                  <MessageBubble
+                    key={message.id}
+                    role={message.role}
+                    content={message.content}
+                    format={message.format}
+                  />
+                ))}
 
-              {loadingAssistantResponse && <TypingIndicator />}
+                {loadingActivities.has(currentActivity) && <TypingIndicator />}
+              </div>
+
+              <ChatInput
+                value={userInput}
+                onChange={setUserInput}
+                onSubmit={handleSubmit}
+                onClear={clearChat}
+                disabled={loadingActivities.has(currentActivity) || !!integrationError}
+                inputRef={inputRef}
+              />
             </div>
-
-            <ChatInput
-              value={userInput}
-              onChange={setUserInput}
-              onSubmit={handleSubmit}
-              onClear={clearChat}
-              disabled={loadingAssistantResponse || !!integrationError}
-              inputRef={inputRef}
-            />
           </div>
         </div>
 
@@ -220,5 +264,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;
