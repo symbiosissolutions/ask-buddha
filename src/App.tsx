@@ -41,7 +41,7 @@ function App() {
   const [textSize, setTextSize] = useState<TextSizeOption>("medium");
   const [currentActivity, setCurrentActivity] = useState<ActivityType>("chat");
   const [isDiscoverOpen, setIsDiscoverOpen] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Default to collapsed as requested earlier
 
   const init = useCallback(async () => {
     setAppInitializing(true);
@@ -210,7 +210,7 @@ function App() {
           onTextSizeChange={handleTextSizeChange} 
           currentTextSize={textSize} 
         />
-        <div className={`main-container${isSidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+        <div className={`main-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
           <SidebarRail 
             isDiscoverOpen={isDiscoverOpen}
             onToggleDiscover={() => setIsDiscoverOpen(!isDiscoverOpen)}

@@ -7,9 +7,10 @@
   border-right: 1px solid rgba(255, 209, 102, 0.1);
   display: flex;
   flex-direction: column;
-  padding: var(--space-6);
-  position: relative;
-  z-index: 1;
+  padding: var(--space-8) var(--space-6) var(--space-6); /* Increased top padding for better spacing */
+  position: sticky;
+  top: 64px;
+  z-index: 10;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -42,6 +43,7 @@
 
 .discover-header {
   margin-bottom: var(--space-8);
+  padding-top: var(--space-4); /* Ensures greeting clears any overlap */
 }
 
 .discover-greeting {
@@ -59,6 +61,7 @@
   gap: 10px;
 }
 
+/* ── Container query for smaller panel widths ── */
 @container (max-width: 280px) {
   .discover-grid {
     grid-template-columns: 1fr;
@@ -136,6 +139,25 @@
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .discover-panel {
-    display: none;
+    position: fixed; /* Overlays the chat content on mobile */
+    left: 50px; /* Aligns with the mobile sidebar */
+    width: 0;
+    z-index: 100;
+    background: rgba(13, 10, 7, 0.95);
+    backdrop-filter: blur(20px);
+  }
+
+  .discover-panel.open {
+    width: calc((100vw - 50px) * 0.5); /* Covers exactly half the available space */
+    min-width: 160px; /* Ensures cards are still usable */
+  }
+
+  .discover-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-auto-rows: 120px;
+  }
+
+  .activity-card.span-2 {
+    grid-row: span 1; /* Normalize spans for single column */
   }
 }
