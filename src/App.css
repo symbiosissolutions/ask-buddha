@@ -96,6 +96,29 @@ body {
   padding-top: 64px;
 }
 
+/* ── ADDED: Sidebar support ── */
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding-left: 240px; /* Expanded state */
+  transition: padding-left 0.3s var(--ease-smooth);
+}
+
+.main-container.sidebar-collapsed {
+  padding-left: 60px; /* Collapsed state */
+}
+
+@media (max-width: 767px) {
+  .main-container {
+    padding-left: 200px; /* Matching mobile expanded width */
+  }
+  
+  .main-container.sidebar-collapsed {
+    padding-left: 50px; /* Matching mobile collapsed width */
+  }
+}
+
 /* ── Chat section ── */
 .chat-section {
   flex: 1;

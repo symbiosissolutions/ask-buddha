@@ -1,4 +1,5 @@
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import lotusIcon from '../assets/lotus.png';
 import userIcon from '../assets/user.png';
 import { ROLE_LABELS } from '../constants/enums';
@@ -27,7 +28,7 @@ export const MessageBubble = ({ role, content, format }: MessageBubbleProps) => 
       </div>
       <div className="bubble-content">
         {format === 'markdown' ? (
-          <Markdown>{content}</Markdown>
+          <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
         ) : (
           content
         )}

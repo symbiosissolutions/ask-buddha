@@ -1,0 +1,163 @@
+.discover-panel {
+  width: 380px;
+  min-width: 0;
+  height: calc(100vh - 64px);
+  background: rgba(13, 10, 7, 0.4);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 209, 102, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) var(--space-6) var(--space-6); /* Increased top padding for better spacing */
+  position: sticky;
+  top: 64px;
+  z-index: 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold-dim) transparent;
+  transition: all 0.3s ease;
+  container-type: inline-size;
+}
+
+.discover-panel.closed {
+  width: 0;
+  opacity: 0;
+  padding: var(--space-6) 0;
+  border-right: none;
+  pointer-events: none;
+}
+
+.discover-panel.open {
+  width: 380px;
+  opacity: 1;
+}
+
+.discover-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.discover-panel::-webkit-scrollbar-thumb {
+  background: var(--color-gold-dim);
+  border-radius: var(--border-radius-pill);
+}
+
+.discover-header {
+  margin-bottom: var(--space-8);
+  padding-top: var(--space-4); /* Ensures greeting clears any overlap */
+}
+
+.discover-greeting {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-gold-bright);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 140px;
+  gap: 10px;
+}
+
+/* ── Container query for smaller panel widths ── */
+@container (max-width: 280px) {
+  .discover-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activity-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--color-bg-elevated);
+  transition: transform var(--duration-normal) var(--ease-smooth), 
+              box-shadow var(--duration-normal) var(--ease-smooth);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.activity-card.active {
+  outline: 2px solid var(--color-gold-bright);
+  outline-offset: 2px;
+}
+
+.activity-card.span-1 {
+  grid-row: span 1;
+}
+
+.activity-card.span-2 {
+  grid-row: span 2;
+}
+
+.activity-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.activity-card-fallback {
+  width: 100%;
+  height: 100%;
+  background: #3a3a3a; /* Warm grey fallback */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-family: var(--font-body);
+}
+
+.activity-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-4);
+}
+
+.activity-card-label {
+  margin: 0;
+  color: white;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .discover-panel {
+    position: fixed; /* Overlays the chat content on mobile */
+    left: 50px; /* Aligns with the mobile sidebar */
+    width: 0;
+    z-index: 100;
+    background: rgba(13, 10, 7, 0.95);
+    backdrop-filter: blur(20px);
+  }
+
+  .discover-panel.open {
+    width: calc((100vw - 50px) * 0.5); /* Covers exactly half the available space */
+    min-width: 160px; /* Ensures cards are still usable */
+  }
+
+  .discover-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-auto-rows: 120px;
+  }
+
+  .activity-card.span-2 {
+    grid-row: span 1; /* Normalize spans for single column */
+  }
+}
