@@ -24,6 +24,6 @@ export const ACTIVITIES: Activity[] = [
     description: "Visualize your thoughts in a sacred geometry.",
     imagePath: "/src/assets/activities/mind-map.jpg",
     altText: "A colorful mandala pattern",
-    span: 1,
+    span: 2,
   },
 ];
