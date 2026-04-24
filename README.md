@@ -1,4 +1,4 @@
-# Ask Buddha
+# Ask-Buddha
 
 ## Overview
 
